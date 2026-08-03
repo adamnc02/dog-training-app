@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Dog Training Journey</title>
+<meta name="theme-color" content="#0F3D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dog Training">
+<meta name="mobile-web-app-capable" content="yes">
+<link id="apple-icon" rel="apple-touch-icon" href="">
+<link id="favicon" rel="icon" href="">
+<link id="manifest-link" rel="manifest" href="">
+<style>
+:root{
+  --teal-900:#0F3D3A;
+  --teal-700:#1F6F68;
+  --teal-600:#26857C;
+  --teal-500:#2F8F86;
+  --teal-100:#DCEAE7;
+  --canvas:#F6F3EC;
+  --paper:#FFFEFB;
+  --sand:#EDE7D9;
+  --sand-dark:#E1D9C4;
+  --ink:#24261F;
+  --ink-soft:#5B5D52;
+  --ink-faint:#8B8C7F;
+  --line:#DAD4C4;
+  --clay:#A85C3B;
+  --clay-soft:#EFE0D6;
+  --moss:#5F7C4E;
+  --moss-soft:#E1E9D8;
+  --danger:#A83B3B;
+  --radius-s:8px;
+  --radius-m:14px;
+  --radius-l:22px;
+  --shadow-card:0 1px 2px rgba(36,38,31,0.06), 0 6px 18px rgba(36,38,31,0.06);
+  --font-display:'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--teal-900);}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--canvas);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:var(--font-display); font-weight:600; letter-spacing:-0.01em;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::selection{background:var(--teal-100);}
+#app{
+  max-width:520px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--canvas);
+  position:relative;
+  padding-bottom:calc(24px + var(--safe-bottom));
+  box-shadow:0 0 60px rgba(0,0,0,0.15);
+}
+a{color:var(--teal-700);}
+
+/* ---------- Utility ---------- */
+.hidden{display:none !important;}
+.container{padding:0 20px;}
+.stack{display:flex; flex-direction:column;}
+.row{display:flex; align-items:center;}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 20px; border-radius:999px; border:none;
+  font-size:15px; font-weight:600; line-height:1;
+  transition:transform .12s ease, opacity .12s ease;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--teal-700); color:#fff;}
+.btn-primary:disabled{background:var(--ink-faint); opacity:.5; cursor:not-allowed;}
+.btn-ghost{background:transparent; color:var(--teal-700); border:1.5px solid var(--teal-700);}
+.btn-plain{background:var(--sand); color:var(--ink);}
+.btn-danger{background:transparent; color:var(--danger); border:1.5px solid var(--danger);}
+.btn-block{width:100%;}
+.btn-sm{padding:9px 14px; font-size:13px; border-radius:999px;}
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+  letter-spacing:.02em; text-transform:uppercase;
+}
+.pill-active{background:var(--teal-100); color:var(--teal-900);}
+.pill-complete{background:var(--moss-soft); color:var(--moss);}
+.pill-locked{background:var(--sand-dark); color:var(--ink-faint);}
+.divider{height:1px; background:var(--line); border:none; margin:0;}
+.divider-strong{height:1px; background:var(--ink-faint); opacity:.35; border:none; margin:0;}
+.divider-hero{height:2px; background:var(--teal-700); border:none; margin:0; width:40px; border-radius:2px;}
+.card{
+  background:var(--paper);
+  border-radius:var(--radius-m);
+  border:1px solid var(--line);
+}
+.muted{color:var(--ink-soft);}
+.faint{color:var(--ink-faint); font-size:13px;}
+.icon-btn{
+  width:38px; height:38px; border-radius:50%; border:none;
+  background:var(--sand); display:flex; align-items:center; justify-content:center;
+  color:var(--ink);
+}
+.icon-btn svg{width:18px;height:18px;}
+.top-nav{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:calc(14px + var(--safe-top)) 16px 12px;
+  background:linear-gradient(var(--canvas) 65%, transparent);
+}
+.top-nav .title{font-family:var(--font-display); font-size:19px; font-weight:600;}
+
+/* ---------- Splash / Onboarding ---------- */
+.onboard-screen{
+  min-height:100vh; display:flex; flex-direction:column;
+  padding:calc(28px + var(--safe-top)) 24px calc(28px + var(--safe-bottom));
+}
+.onboard-brand{display:flex; align-items:center; gap:10px;}
+.onboard-brand .mark{width:34px;height:34px;}
+.onboard-brand .name{font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--teal-900);}
+.onboard-hero{flex:1; display:flex; flex-direction:column; justify-content:center; padding:24px 0;}
+.onboard-hero h1{font-size:34px; line-height:1.12; color:var(--teal-900); margin:0 0 14px;}
+.onboard-hero p{font-size:16px; color:var(--ink-soft); line-height:1.5; margin:0 0 6px; max-width:38ch;}
+.onboard-actions{margin-top:0;}
+.step-eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--teal-600); font-weight:700; margin-bottom:10px;}
+.step-q{font-size:24px; line-height:1.3; margin:0 0 8px; color:var(--teal-900);}
+.step-sub{font-size:14.5px; color:var(--ink-soft); margin:0 0 26px; line-height:1.5;}
+.choice-list{display:flex; flex-direction:column; gap:10px;}
+.choice{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px; border-radius:var(--radius-m);
+  background:var(--paper); border:1.5px solid var(--line);
+  font-size:15.5px; font-weight:600; text-align:left; width:100%;
+}
+.choice.selected{border-color:var(--teal-700); background:var(--teal-100); color:var(--teal-900);}
+.choice .sub{font-weight:400; color:var(--ink-soft); font-size:13px; margin-top:2px;}
+.field{margin-bottom:20px;}
+.field label{display:block; font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:8px;}
+.field input[type=text], .field select{
+  width:100%; padding:14px 16px; border-radius:var(--radius-s);
+  border:1.5px solid var(--line); background:var(--paper); font-size:16px; color:var(--ink);
+}
+.field input[type=text]:focus, .field select:focus, .choice:focus-visible, button:focus-visible, a:focus-visible{
+  outline:2.5px solid var(--teal-500); outline-offset:2px;
+}
+.gender-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+.gender-grid .choice{padding:12px 8px; justify-content:center; text-align:center; font-size:13.5px;}
+.onboard-footer{margin-top:28px; display:flex; gap:10px;}
+.progress-dots{display:flex; gap:6px; margin-bottom:20px;}
+.progress-dots span{width:6px;height:6px;border-radius:50%;background:var(--sand-dark);}
+.progress-dots span.on{background:var(--teal-600); width:18px; border-radius:3px;}
+.loc-setup-item{padding:16px 0;}
+.loc-setup-item .idx{font-family:var(--font-mono); font-size:11px; color:var(--teal-600); font-weight:700;}
+.loc-setup-item .desc{font-size:13px; color:var(--ink-soft); margin:4px 0 10px; line-height:1.45;}
+.loc-setup-item input{
+  width:100%; padding:11px 14px; border-radius:var(--radius-s);
+  border:1.5px solid var(--line); background:var(--paper); font-size:15px;
+}
+
+/* ---------- Journey (trail map) ---------- */
+.journey-wrap{padding:4px 0 40px;}
+.journey-hero{padding:6px 20px 22px;}
+.journey-hero .eyebrow{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--teal-600); font-weight:700;}
+.journey-hero h1{font-size:26px; margin:8px 0 4px; color:var(--teal-900);}
+.journey-hero p{color:var(--ink-soft); font-size:14.5px; margin:0; line-height:1.5;}
+.trail{position:relative; padding:10px 0 10px 0;}
+.trail-svg-col{position:absolute; left:34px; top:0; bottom:0; width:4px;}
+.node-row{
+  position:relative; display:flex; gap:16px; padding:0 20px 34px 20px; align-items:flex-start;
+}
+.node-row:last-child{padding-bottom:6px;}
+.node-dot-wrap{position:relative; width:32px; display:flex; justify-content:center; flex-shrink:0; z-index:2;}
+.node-dot{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--line); background:var(--paper); color:var(--ink-faint);
+  font-family:var(--font-mono); font-size:12px; font-weight:700;
+}
+.node-dot svg{width:15px;height:15px;}
+.node-row.active .node-dot{background:var(--teal-700); border-color:var(--teal-700); color:#fff; box-shadow:0 0 0 5px var(--teal-100);}
+.node-row.complete .node-dot{background:var(--moss); border-color:var(--moss); color:#fff;}
+.node-card{
+  flex:1; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-m);
+  padding:16px 16px; text-align:left; width:100%;
+}
+.node-row.locked .node-card{background:transparent; border-style:dashed; opacity:.7;}
+.node-row.active .node-card{border-color:var(--teal-600); box-shadow:var(--shadow-card);}
+.node-card .label{font-family:var(--font-display); font-size:17px; font-weight:600; color:var(--teal-900); margin-bottom:2px;}
+.node-row.locked .node-card .label{color:var(--ink-faint);}
+.node-card .goal{font-size:13.5px; color:var(--ink-soft); line-height:1.45; margin-top:4px;}
+.node-card .meta-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+.trail-connector{
+  position:absolute; left:15px; top:32px; bottom:-34px; width:2px;
+  background:repeating-linear-gradient(to bottom, var(--line) 0 6px, transparent 6px 11px);
+}
+.node-row.complete .trail-connector{background:var(--moss); opacity:.4;}
+.node-row:last-child .trail-connector{display:none;}
+
+.fab-settings{
+  position:fixed; right:calc(16px + (100vw - 520px)/2); bottom:calc(20px + var(--safe-bottom));
+  z-index:30; width:52px;height:52px;border-radius:50%;
+  background:var(--teal-900); color:#fff; border:none; box-shadow:0 8px 24px rgba(15,61,58,.35);
+  display:flex; align-items:center; justify-content:center;
+}
+@media (max-width:552px){ .fab-settings{ right:16px; } }
+.fab-settings svg{width:22px;height:22px;}
+
+/* ---------- Week Card / Detail screen ---------- */
+.detail-header{
+  position:sticky; top:0; z-index:15; background:var(--teal-900); color:#fff;
+  padding:calc(14px + var(--safe-top)) 18px 18px;
+  border-radius:0 0 20px 20px;
+}
+.detail-header .back-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.detail-header .back-btn, .detail-header .icon-btn-dark{
+  width:36px;height:36px;border-radius:50%; background:rgba(255,255,255,.14); border:none;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+}
+.detail-header .back-btn svg, .detail-header .icon-btn-dark svg{width:17px;height:17px;}
+.icon-btn-dark.flash-red{background:var(--danger) !important; color:#fff; transition:background .25s ease;}
+.detail-header .phase-eyebrow{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--teal-100); font-weight:700;}
+.detail-header h1{font-size:24px; margin:6px 0 8px; color:#fff;}
+.detail-header .overview{font-size:14px; color:var(--teal-100); line-height:1.55; opacity:.92; margin:0;}
+.action-row{display:flex; gap:10px; margin-top:16px;}
+.action-chip{
+  flex:1; display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  background:rgba(255,255,255,.12); border:none; border-radius:var(--radius-s);
+  padding:11px 12px; color:#fff; text-align:left;
+}
+.action-chip svg{width:16px;height:16px;}
+.action-chip .lbl{font-size:12.5px; font-weight:700;}
+
+.section-label{
+  font-size:12px; text-transform:uppercase; letter-spacing:.07em; font-weight:700;
+  color:var(--teal-700); padding:22px 20px 10px;
+}
+.carousel{display:flex; gap:12px; overflow-x:auto; padding:2px 20px 6px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;}
+.carousel::-webkit-scrollbar{display:none;}
+.ex-card{
+  scroll-snap-align:start; flex:0 0 86%; background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius-m); padding:18px; box-shadow:var(--shadow-card);
+}
+.ex-card h3{margin:0 0 12px; font-size:18px; color:var(--teal-900);}
+.ex-card .subhead{font-size:11px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--teal-600); margin:14px 0 6px;}
+.ex-card .subhead:first-of-type{margin-top:0;}
+.ex-card ul{margin:0; padding-left:18px;}
+.ex-card li{font-size:14px; line-height:1.55; margin-bottom:6px; color:var(--ink);}
+.ex-card .why-text{font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0;}
+.carousel-dots{display:flex; justify-content:center; gap:5px; margin:10px 0 0;}
+.carousel-dots span{width:5px;height:5px;border-radius:50%; background:var(--sand-dark);}
+.carousel-dots span.on{background:var(--teal-600);}
+
+.days-list{padding:6px 20px 10px;}
+.day-row{border-bottom:1px solid var(--line);}
+.day-row:last-child{border-bottom:none;}
+.day-row-head{
+  width:100%; background:none; border:none; display:flex; align-items:center; justify-content:space-between;
+  padding:16px 2px; text-align:left; gap:10px;
+}
+.day-row-head .left{display:flex; align-items:center; gap:12px;}
+.day-badge{
+  width:34px;height:34px;border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-weight:700; font-size:12.5px; flex-shrink:0;
+  background:var(--sand); color:var(--ink-soft);
+}
+.day-row.complete .day-badge{background:var(--moss-soft); color:var(--moss);}
+.day-row.active .day-badge{background:var(--teal-700); color:#fff;}
+.day-row.locked .day-badge{color:var(--ink-faint);}
+.day-title{font-weight:600; font-size:15px;}
+.day-row.locked .day-title{color:var(--ink-faint);}
+.day-sub{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+.chev{transition:transform .18s ease; color:var(--ink-faint); flex-shrink:0;}
+.chev svg{width:16px;height:16px;}
+.day-row.open .chev{transform:rotate(180deg);}
+.day-body{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+.day-row.open .day-body{max-height:2000px;}
+.day-body-inner{padding:0 2px 18px;}
+.session-block{margin-bottom:16px;}
+.session-block:last-child{margin-bottom:0;}
+.session-name{font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--teal-700); margin-bottom:8px;}
+.component-chain{display:flex; flex-direction:column; gap:0;}
+.component{display:flex; align-items:flex-start; gap:10px; padding:8px 0;}
+.component:not(:last-child){border-bottom:1px dashed var(--line);}
+.component .dot{width:7px;height:7px;border-radius:50%; background:var(--teal-500); margin-top:6px; flex-shrink:0;}
+.component .ctext{font-size:14px; line-height:1.4;}
+.component .ctext b{font-weight:600;}
+.component .cloc{font-size:12px; color:var(--ink-faint); margin-top:1px;}
+.day-locked-note{
+  display:flex; align-items:center; gap:8px; padding:12px 14px; margin-top:6px;
+  background:var(--sand); border-radius:var(--radius-s); font-size:13px; color:var(--ink-soft);
+}
+.day-locked-note svg{width:15px;height:15px; flex-shrink:0;}
+.complete-btn-wrap{margin-top:14px;}
+
+/* ---------- Modals ---------- */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(15,17,14,.5); z-index:50;
+  display:flex; align-items:flex-end; justify-content:center;
+  animation:fadeIn .15s ease;
+}
+@keyframes fadeIn{from{opacity:0} to{opacity:1}}
+.modal-sheet{
+  width:100%; max-width:520px; background:var(--canvas); border-radius:22px 22px 0 0;
+  max-height:88vh; overflow-y:auto; padding-bottom:calc(28px + var(--safe-bottom));
+  animation:slideUp .22s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes slideUp{from{transform:translateY(24px); opacity:.6} to{transform:translateY(0); opacity:1}}
+.modal-grabber{width:38px;height:4px;background:var(--sand-dark); border-radius:3px; margin:12px auto 4px;}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:8px 20px 14px;}
+.modal-head h2{font-size:19px; margin:0; color:var(--teal-900);}
+.modal-close{width:32px;height:32px;border-radius:50%; background:var(--sand); border:none; display:flex; align-items:center; justify-content:center;}
+.modal-close svg{width:14px;height:14px;}
+.tabs{display:flex; gap:8px; padding:0 20px 14px;}
+.tab-btn{padding:9px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--paper); font-size:13.5px; font-weight:600; color:var(--ink-soft);}
+.tab-btn.on{background:var(--teal-700); border-color:var(--teal-700); color:#fff;}
+.modal-body{padding:0 20px 10px;}
+.loc-item{padding:14px 0; border-bottom:1px solid var(--line);}
+.loc-item:last-child{border-bottom:none;}
+.loc-item .num{font-family:var(--font-mono); font-size:11px; color:var(--teal-600); font-weight:700;}
+.loc-item .chosen{font-size:15.5px; font-weight:600; margin:3px 0 2px;}
+.loc-item .desc{font-size:13px; color:var(--ink-soft); line-height:1.5;}
+.rule-item{padding:14px 0; border-bottom:1px solid var(--line);}
+.rule-item:last-child{border-bottom:none;}
+.rule-item .rtitle{font-weight:600; font-size:14.5px; margin-bottom:4px; color:var(--teal-900);}
+.rule-item p{margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.55;}
+.glossary-item{padding:13px 0; border-bottom:1px solid var(--line);}
+.glossary-item:last-child{border-bottom:none;}
+.glossary-item dt{font-weight:700; font-size:14.5px; color:var(--teal-900); font-family:var(--font-display);}
+.glossary-item dd{margin:4px 0 0; font-size:13.5px; color:var(--ink-soft); line-height:1.55;}
+.golden-banner{
+  background:var(--teal-900); color:#fff; border-radius:var(--radius-m); padding:16px 18px; margin:0 0 16px;
+}
+.golden-banner .gt{font-size:11px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--teal-100); margin-bottom:8px;}
+.golden-banner li{font-size:13.5px; line-height:1.5; margin-bottom:6px; color:#fff;}
+.golden-banner li:last-child{margin-bottom:0;}
+
+/* ---------- Settings ---------- */
+.settings-section{padding:18px 20px;}
+.settings-section h3{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--teal-700); margin:0 0 12px;}
+.setting-row{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:14px 0; border-bottom:1px solid var(--line);
+}
+.setting-row:last-child{border-bottom:none;}
+.setting-row .lbl{font-size:14.5px; font-weight:600;}
+.setting-row .desc{font-size:12.5px; color:var(--ink-soft); margin-top:2px; line-height:1.4;}
+.switch{width:46px;height:27px;border-radius:999px; background:var(--sand-dark); position:relative; border:none; flex-shrink:0;}
+.switch.on{background:var(--teal-600);}
+.switch::after{content:'';position:absolute; top:3px; left:3px; width:21px;height:21px;border-radius:50%; background:#fff; transition:transform .16s ease; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.switch.on::after{transform:translateX(19px);}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; left:50%; bottom:calc(28px + var(--safe-bottom)); transform:translateX(-50%);
+  background:var(--ink); color:#fff; padding:12px 20px; border-radius:999px; font-size:13.5px;
+  z-index:80; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(-6px);}
+
+.empty-note{padding:40px 20px; text-align:center; color:var(--ink-faint); font-size:14px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script id="app-script">
+/* ============================================================
+   Dog Training Journey PWA
+   Single-file build. Data + state + render, no framework.
+   ============================================================ */
+
+/* ---------------- Icons (inline SVG, stroke=currentColor) ---------------- */
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  chevDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.6 7-12a7 7 0 10-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 8v.01"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 000-3l-1-.6a7.6 7.6 0 00-.9-2.2l.4-1.1a1.7 1.7 0 00-2.1-2.1l-1.1.4a7.6 7.6 0 00-2.2-.9l-.6-1a1.7 1.7 0 00-3 0l-.6 1a7.6 7.6 0 00-2.2.9l-1.1-.4a1.7 1.7 0 00-2.1 2.1l.4 1.1a7.6 7.6 0 00-.9 2.2l-1 .6a1.7 1.7 0 000 3l1 .6c.2.8.5 1.5.9 2.2l-.4 1.1a1.7 1.7 0 002.1 2.1l1.1-.4c.7.4 1.4.7 2.2.9l.6 1a1.7 1.7 0 003 0l.6-1c.8-.2 1.5-.5 2.2-.9l1.1.4a1.7 1.7 0 002.1-2.1l-.4-1.1c.4-.7.7-1.4.9-2.2l1-.6z"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',
+  paw: '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="5.4" ry="4.6"/><ellipse cx="4.6" cy="9.5" rx="2.3" ry="3"/><ellipse cx="9.4" cy="5.6" rx="2.3" ry="3"/><ellipse cx="14.6" cy="5.6" rx="2.3" ry="3"/><ellipse cx="19.4" cy="9.5" rx="2.3" ry="3"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16.5H6.5A2.5 2.5 0 004 21.5V5.5z"/><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/></svg>',
+  compass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M15.2 8.8l-2 4.6-4.6 2 2-4.6 4.6-2z"/></svg>',
+};
+
+/* ---------------- Personalization ---------------- */
+function personalize(str, s){
+  if(!str) return str;
+  const name = (s && s.dogName) ? s.dogName : 'your dog';
+  const obj = s && s.dogGender==='female' ? 'her' : 'him';
+  const poss = s && s.dogGender==='female' ? 'her' : 'his';
+  return str.replace(/\{\{(dog_name|dog_object|dog_possessive)\}\}/g, (m,g)=>{
+    if(g==='dog_name') return name;
+    if(g==='dog_object') return obj;
+    return poss;
+  });
+}
+function P(str){ return personalize(str, STATE); }
+
+/* ---------------- Fixed reference data ---------------- */
+const LOCATIONS = [
+  {id:1, name:'Garden', desc:"Home back garden, kept as sterile/distraction-free as possible while {{dog_name}} learns new skills."},
+  {id:2, name:'Front Drive', desc:"Front garden or driveway with a view of the street. Watch for the postman."},
+  {id:3, name:'Top of Road', desc:"Street outside home, using lampposts as A/B reference points. Stick to quieter times of day. Cross the road to dodge oncoming triggers."},
+  {id:4, name:'Garden Centre (Car Park)', desc:"Car park of the local supermarket."},
+  {id:5, name:'Grassy Area (Footpath Only)', desc:"Quiet green with a surrounding footpath, reducing off-lead dog encounters."},
+  {id:6, name:'Pets at Home (Car Park)', desc:"Outside the gym car park, timed around a class finishing."},
+  {id:7, name:'Grassy Area', desc:"Central area of the green above; use kids playing football as a distraction."},
+  {id:8, name:'Park (Opposite Side of Road to Entrance)', desc:"Pavement opposite a known park/high dog-traffic area — visible dog \u201ctraffic\u201d without close encounters."},
+  {id:9, name:'Runway Walk', desc:"Pavement on the same side as the park — dogs may share your side of the path as they commute in. Watch for large uncontrolled groups."},
+  {id:10, name:'Addlington Golf Club', desc:"Park entrance with a good peripheral view — a spot to start reducing distance from other dogs."},
+  {id:11, name:'Park (Entrance Only)', desc:"Park car park — dogs off-lead here tend to beeline for the space; good for practicing around off-lead (non-charging) dogs."},
+  {id:12, name:'Park (Inside, Near Child Play)', desc:"Adjacent to a fenced child play area — a novel stimulus."},
+  {id:13, name:'Local Caf\u00e9 (Outside)', desc:"Outside a local caf\u00e9 — pick a spot away from the entrance in case a dog \u201cpops out\u201d unexpectedly."},
+  {id:14, name:'Aviator (Beer Garden)', desc:"Outside a local pub — work place skills in the beer garden."},
+  {id:15, name:'Local Caf\u00e9 (Inside)', desc:"First enclosed-space location. Choose a spot with a clear view of entrances/exits."},
+  {id:16, name:'Pets at Home (Self Groom)', desc:"Vet waiting room (by arrangement) — watch for cats/small animals in carriers."},
+  {id:17, name:'Aviator (Inside)', desc:"Pub interior — traffic varies a lot by time/day."},
+  {id:18, name:'Fletcher Moss (River Bank)', desc:"Quiet park — pick your time carefully; sights/smells alone will raise arousal even without a dog sighting."},
+  {id:19, name:'Fletcher Moss (Perimeter/Path of Fields)', desc:"Busier park — pushing further once the quiet-time version is solid."},
+  {id:20, name:'Fletcher Moss (Centre of Fields)', desc:"Centre of a busy dog-walking spot — narrow paths, off-lead dogs everywhere. The toughest environment in the program."},
+];
+const LOC_BY_NAME = {};
+LOCATIONS.forEach(l=> LOC_BY_NAME[l.name]=l);
+
+const GLOSSARY = [
+  {term:'Terminal marker', def:'The marker word/sound (e.g. "Yes") that means "that behaviour is complete and reward is coming to you" — used with Redirect Exercise, Recall, and Play. Always followed by movement and payment.'},
+  {term:'Duration marker', def:'A separate marker (e.g. "Good") used for behaviours that must be held, like Place — signals "stay exactly where you are, reward is coming to you" rather than "come and get it."'},
+  {term:'Punishment marker', def:'A firm but not shouted word (e.g. "Bad"/"Stop") used at the start of the Punishment Protocol to mark an unwanted behaviour the instant it happens.'},
+  {term:'Re-engage cue', def:'A distinct sound or word (not the terminal marker) that tells {{dog_name}} it\u2019s now OK to come back onto the toy during Play, used after an "Out."'},
+  {term:'Prong collar — fitting', def:'Should sit high on the neck, snug enough that light taps register without excessive slack, never used for hard yanks — taps only. The chain element sits on the side of the neck closest to the owner (e.g. if {{dog_name}} walks on your right, the chain sits on the left side of {{dog_possessive}} neck).'},
+  {term:'Umbilical cord', def:'Keeping {{dog_name}} on a short lead attached to the owner\u2019s body/belt indoors, so {{dog_name}} is always within arm\u2019s reach and can\u2019t rehearse unwanted behaviours unsupervised.'},
+  {term:'Back-tie', def:'Tethering {{dog_name}}\u2019s lead to a fixed point (e.g. furniture leg, hook) rather than to the owner, used during Place work or setups to prevent {{dog_name}} leaving position without the owner having to hold the lead.'},
+  {term:'"Out"', def:'The cue meaning "release the toy and don\u2019t attempt to get it back" during Play, until the re-engage cue is given.'},
+  {term:'"Break" / "OK"', def:'The release cue used in Loose Lead Walking to formally permit {{dog_name}} to take food from the floor or end a held position.'},
+  {term:'"Heel"', def:'The cue meaning "walk directly beside me, head up, no pulling," held until formally released.'},
+  {term:'Jackpot event', def:'A bigger-than-usual reward — 10\u201315 pieces of kibble fed one at a time, delivered while continuously moving backwards/away from {{dog_name}} — used to create unpredictability and mark an especially good response. Never thrown on the floor; chasing you should always be the best part of the game.'},
+];
+
+const GOLDEN_RULES = [
+  {title:'No free access to toys', body:'No toys are left out or accessible outside of a Play window, at any point in the program.'},
+  {title:'No free-feeding or bowl feeding', body:'Bowl feeding never returns once this training starts — even a single Redirect Exercise rep can substitute as a full-meal jackpot if you\u2019re short on time.'},
+  {title:'No walking outside of training sessions', body:'This prevents {{dog_name}} rehearsing unwanted behaviours outside the structure of a session.'},
+  {title:'Jackpot ratio', body:'Roughly 1 in 5 successful reps should be paid as a jackpot event (10\u201315 pieces fed one at a time) rather than a single piece of kibble — it keeps {{dog_name}} guessing about the value of coming back.'},
+  {title:'Closing the gap to triggers', body:'Gradually reduce the distance to triggers and increase how often {{dog_name}} is exposed to them — week by week, not day by day. Use that week\u2019s location as your guide for when to start progressing an exposure.'},
+  {title:'Avoid head-on passes', body:'Avoid head-on passes with triggers until the final two weeks, once {{dog_name}} has a solid punishment marker. If a trigger is seen during Week 1 through Weeks 2 & 3, cross the road or go the other way, using redirections where necessary.'},
+];
+
+/* ---------------- Exercises (How / Why content) ---------------- */
+const EX = {
+  handFeeding:{ title:'Hand Feeding', how:[
+    "No bowl feeding at all; no wet food — kibble only.",
+    "Twice daily (morning meal, evening meal), fill a treat pouch with {{dog_possessive}} full meal and hand-feed it entirely.",
+    "Location progresses across the week: Kitchen \u2192 Garden \u2192 Street just outside the front of the house.",
+    "Immediately after each feed, {{dog_name}} goes straight back inside." ],
+    why:"This is really just a mental switch — for {{dog_name}} and for you — that without you, {{dog_possessive}} food does not exist. It gets {{dog_name}} used to not being able to access food for free, which is the foundation everything else in the program builds on." },
+
+  newtonsCradle:{ title:"Newton's Cradle", how:[
+    'Pick a marker word/sound (e.g. "Yes", or a clicker).',
+    "A single set is left \u2192 right \u2192 jackpot: throw a piece of kibble to your left, marking as you throw. When {{dog_name}} turns back from eating it, mark again and throw to the right. On the third turn, mark, then move backwards continuously away from {{dog_name}} while delivering 10\u201315 pieces of kibble one at a time — the jackpot event that completes the set. Repeat sets until the full meal is consumed.",
+    "Critical timing: mark before any visible hand-to-pocket movement, and immediately when {{dog_possessive}} head turns back toward you — never before.",
+    "Set rotation per feeding session (2 feeds/day \u00d7 7 days = 14 sessions, numbered continuously): 5 \u2192 10 \u2192 15 \u2192 5 \u2192 10 \u2192 15\u2026",
+    "On the final set of each session, the jackpot event uses whatever food remains for that meal.",
+    "{{dog_name}} must be on a flexi lead throughout." ],
+    why:"Dogs have a hierarchy of communication — physical, sight, then audio, which is their least preferred. If {{dog_name}} sees your hand move to your pocket before the marker, {{dog_name}} learns hand-to-pocket (not the marker) predicts food. Marking first, every time, keeps the marker as the one true predictor of food arriving.\n\nMoving backwards during the jackpot event taps into {{dog_possessive}} prey drive — {{dog_name}} has to keep working for it. Jackpots create a \u201cgambler\u2019s\u201d effect: \u201cif I go back this time I might win big!\u201d — this keeps {{dog_name}} guessing about value and coming back for more. The jackpot is never thrown on the floor, because chasing you should always be the best part of the game.\n\nThe preceding Hand Feeding week gets {{dog_name}} used to not being able to get food for free at all; Newton\u2019s Cradle then builds the marker\u2019s meaning on top of that foundation." },
+
+  redirectExercise:{ title:'Redirect Exercise', how:[
+    "Use the prong collar on a 6ft lead and begin walking around.",
+    "Every time {{dog_name}} appears to be distracted (sniffing the floor, a bush, or just not paying attention to you), use your marker and immediately start moving backwards, away from {{dog_name}}.",
+    "If {{dog_name}} follows — great. Pay with 1 piece of kibble.",
+    "If {{dog_name}} doesn\u2019t follow and stays focused on the distraction, use lead pressure to guide {{dog_object}} to you, then pay.",
+    "If your first attempt to guide {{dog_object}} back doesn\u2019t work, use a little more pressure.",
+    "Use taps, not pulls, on the lead. If you can\u2019t tap (only pull), your lead is too tight — move closer to {{dog_name}}.",
+    "Repeat every time {{dog_name}} gets distracted. Every 5th successful repetition, jackpot with 10\u201315 pieces of kibble, fed one at a time.",
+    "Aim for the 85% success rule — short, focused sessions." ],
+    why:"In low-distraction, low-reward situations, this starts teaching {{dog_name}} that you are a better choice than anything else around {{dog_object}}. It also teaches {{dog_name}} that your marker is non-negotiable — the lead pressure is what happens if {{dog_name}} chooses to ignore it — and starts teaching {{dog_name}} how to \u201cturn off\u201d pressure from the collar, in an environment where {{dog_name}} is unlikely to blow through it." },
+
+  play1:{ title:'Play', how:[
+    "Put {{dog_name}} on {{dog_possessive}} prong collar and normal lead. Calmly take {{dog_object}} outside, let {{dog_object}} sniff and go to the toilet if needed.",
+    "Hide the toy in your pocket or under your shirt. Hold the lead in one hand, present the toy with the other.",
+    "Never put the toy in {{dog_possessive}} mouth. Show {{dog_object}} the toy, then immediately move it away — the game is that {{dog_name}} has to catch and \u201cwin\u201d it.",
+    "If {{dog_name}} latches on, keep hold of the toy and test {{dog_possessive}} grip. If it\u2019s a good grip, don\u2019t just let go — make a noise as if you tried hard to keep it, and let the toy \u201cslip\u201d out of your hands.",
+    "Once {{dog_name}} has won the toy, keep moving away from {{dog_object}}. Let {{dog_name}} parade for a few seconds, then re-engage by grabbing part of the toy while still moving away.",
+    "If {{dog_name}} drops the toy, race {{dog_object}} back to it — you must win.",
+    "Aim to win the game roughly 2 times out of every 10, and always finish on a win for you — never {{dog_name}}.",
+    "As soon as play ends, move straight into Place decompression." ],
+    why:"Dogs need an outlet to express themselves. Without clear windows for this, pressure builds up until it eventually boils over. Play creates a clear window for {{dog_name}} to express {{dog_possessive}} nature.\n\nYou\u2019ve probably noticed {{dog_name}} can go from 0 to 100 in a blink — but going from 100 back to 0 just as fast is arguably more impressive, which is why decompression happens immediately after play. Once tired out, {{dog_name}} is far more receptive to learning.\n\nWe always end the game on our win so {{dog_name}} feels a small sting of \u201closing\u201d — next time, {{dog_name}} is less likely to drop the toy, remembering that doing so ended the game." },
+
+  looseLeadWalking1:{ title:'Loose Lead Walking (early introduction)', how:[
+    "Use cones or lampposts as A/B reference points.",
+    "Walk {{dog_name}} between them on {{dog_possessive}} prong collar and 6ft lead.",
+    "If {{dog_name}} walks in front (nose in front of your toes), crosses behind you, or pulls toward something else, use fair lead pressure and turn 180\u00b0 back to where you came from — no terminal marker here." ],
+    why:"Minimal food here keeps walking boring — which is what makes off-lead freedom rewarding by comparison. It also helps teach {{dog_name}} clearly what\u2019s expected while on lead: essentially, to do nothing besides walk next to you." },
+
+  collarLeadDesensitisation:{ title:'Collar/Lead Desensitisation', how:[
+    "Put {{dog_possessive}} collar and lead on indoors.",
+    "Leave it on for 5 minutes, then remove it.",
+    "If {{dog_name}} is already tethered on a collar/lead for something else at the time, use a separate collar/lead for this." ],
+    why:"This reduces any anticipation of what comes after the collar goes on, so the collar stops being a signal that something (a walk, training, excitement) is about to happen." },
+
+  place_w1:{ title:'Place', how:[
+    'Walk {{dog_name}} onto the place bed. The moment all four paws are on it, say "place" and give a calm "good boy/girl."',
+    "Build short duration on the bed with mild distraction.",
+    "Add a back-tie if {{dog_name}} is making errors (getting up, leaving the bed).",
+    "If using food to reward duration, don\u2019t deliver it too close after an error — this risks rewarding the recovery rather than the calm state." ],
+    why:"This starts teaching {{dog_name}} impulse control very early on into what will be {{dog_possessive}} \u201cnew normal.\u201d This helps remove anticipation and hyper behaviour, while providing {{dog_object}} a safe, calm place outside of the crate." },
+
+  recall23:{ title:'Recall (Phase 1 \u2192 Phase 2)', how:[
+    "Phase 1: Switch {{dog_name}} onto {{dog_possessive}} flat collar. Use the prong collar with a flexi lead or long line. Let {{dog_name}} wander further than before. When ready, recall {{dog_name}}, using frequent, very gentle taps on the lead to guide {{dog_object}} back — don\u2019t stop until {{dog_name}} reaches your feet. Mark, move, pay (1 in 5 a jackpot).",
+    "Phase 2 (from Day 10): Switch back to the prong collar. Instead of frequent gentle taps continuing until {{dog_name}} arrives, use slightly firmer lead taps (still frequent) that stop the instant {{dog_name}} turns, lifts {{dog_possessive}} head, and starts moving toward you." ],
+    why:"Building a solid recall is essential for {{dog_possessive}} safety and the safety of others — it\u2019s the single most important skill for off-lead time. Phase 1\u2019s frequent gentle taps teach {{dog_name}} how to \u201cturn off\u201d the constant, mildly annoying pressure. Phase 2 starts teaching that acknowledging the recall quickly and early is what turns the pressure off, rather than the eventual return alone." },
+
+  looseLeadPunishment:{ title:'Loose Lead Walking + Punishment Protocol Rehearsal', how:[
+    "Loose Lead Walking: once reliable, introduce artificial distractions (dropped kibble). If {{dog_name}} puts {{dog_possessive}} head down for the kibble, use lead pressure and turn 180\u00b0 back, and keep re-presenting the food on the floor until {{dog_name}} learns to ignore it and walk past it. Once {{dog_name}} has a solid understanding of where {{dog_name}} should be, start using the command \u201cheel\u201d to begin the walk — held until formally released on a \u201cbreak\u201d/\u201cOK\u201d cue.",
+    'Punishment Protocol (rehearsal target: something {{dog_name}} likes doing but shouldn\u2019t — counter surfing, bin diving, etc., never a reactive trigger): set up away from {{dog_name}}. Walk {{dog_object}} toward it. If {{dog_name}} goes for it: mark ("bad"/"stop") \u2192 2 firm lead pops \u2192 disappointed commentary while moving. Repeat this full sequence 3 times, then tether, deliver a final disappointed comment and a sigh, and turn your back. After 30+ seconds, reconcile fully, then re-present the trigger to test understanding.' ],
+    why:"By adding synthetic distractions to loose lead walking, we further instil in {{dog_name}} what the expected behaviour is: head up, eyes front, walk next to you — the environment isn\u2019t {{dog_possessive}} to interact with unless you say so. The Punishment Protocol, rehearsed on something positively-associated rather than a real trigger, is the fairest way to teach {{dog_name}} that a wrong decision has consequences, without {{dog_name}} already being in a heightened emotional state." },
+
+  playWithCues:{ title:'Play (with cues)', how:[
+    'Introduce a start cue ("Shall we play?") and an end cue ("All finished").' ],
+    why:"Adding these cues creates a clear window for {{dog_name}} — unless those words are heard, {{dog_name}} shouldn\u2019t be getting into high-arousal states." },
+
+  place_w23:{ title:'Place', how:[
+    "Continue daily duration work with mild distraction; increase the distraction level if {{dog_name}} is doing well.",
+    "Consider a back-tie if you can\u2019t stay fully attentive.",
+    "Introduce Formal Place Training as the evening variant — a calmer, more deliberate decompression session distinct from the quicker daytime touchpoints." ],
+    why:"This helps teach {{dog_name}} that after play or other high-arousal states, the crate isn\u2019t the only place {{dog_name}} can relax and unwind. Dogs do most of their learning when asleep, so the calmer we can help {{dog_name}} be in the house, the quicker {{dog_name}} will learn whatever it is we\u2019re teaching {{dog_object}}." },
+
+  superFocusPunishment:{ title:'Super Focus Game & Punishment Protocol Practice', how:[
+    "Move Punishment Protocol rehearsal away from home (still a controlled setup, with somewhere to tether in sight of it).",
+    "For Super Focus: stand somewhere with plenty of visible distractions, {{dog_name}} sat beside you. Every time {{dog_possessive}} focus shifts elsewhere — marker, move, pay.",
+    "Expect these sessions to be short." ],
+    why:"Practicing the Punishment Protocol away from home teaches {{dog_name}} that consequences apply everywhere, not just at home. Super Focus further strengthens the value of your marker by \u201cerasing\u201d the world around {{dog_name}}." },
+
+  recallLooseLead:{ title:'Recall & Loose Lead Walking', how:[
+    "Continue Phase 2 recall and Loose Lead Walking together at the day\u2019s location, layering in the location\u2019s natural distractions." ],
+    why:"Combining these two skills under real environmental distraction is the bridge between isolated training exercises and the trigger work coming in Weeks 6&7. This gives an easy route into teaching {{dog_name}} that recall is still non-negotiable no matter where {{dog_name}} is or what the distraction is, without being so hard {{dog_name}} might fail." },
+
+  phase3Recall:{ title:'Phase 3 Recall', how:[
+    "Recall should now be fairly reliable. Don\u2019t set this phase up artificially — simply continue recalling {{dog_name}} during normal life.",
+    "The first time {{dog_name}} doesn\u2019t respond immediately, use one very firm/harsh lead pop and guide {{dog_object}} back — one pop should be enough to get full attention.",
+    "Mark and pay when {{dog_name}} arrives (even if a correction was needed) — jackpot the first few times." ],
+    why:"Done correctly, this has a major impact on recall reliability. If the correction is significant enough, {{dog_name}} will want to avoid it in future — and that avoidance reinforces recall further, since coming back becomes the more comfortable choice." },
+
+  place_w45:{ title:'Place', how:[
+    "Formal Place Training becomes the primary decompression method, replacing the crate entirely.",
+    "Start spacing out food delivery for duration rewards (10\u201315 minutes between rewards by this point) — build patience rather than rewarding on a fixed schedule.",
+    "Correct with lead pressure if {{dog_name}} breaks position.",
+    "Occasionally drop food on purpose as a deliberate \u201ctest\u201d of duration and impulse control." ],
+    why:"Impulse control here is a huge game changer if we want {{dog_name}} to be calm. During Play, we\u2019re teaching {{dog_name}} that there are clear windows for expression; through everything else, we\u2019re teaching structure. Impulse control is one of the most important skills a dog can learn to be calm — imagine a dog that sees a squirrel and doesn\u2019t immediately bolt: that\u2019s impulse control." },
+
+  playWithRules:{ title:'Play (with rules)', how:[
+    "Start the game by building up frustration in {{dog_name}}: move backwards away from {{dog_name}} so {{dog_name}} starts chasing or jumping up at you. Gently push {{dog_object}} off and use phrases like \u201cget off,\u201d \u201ccome on\u201d to build frustration ahead of the game. Once {{dog_possessive}} energy is high, reveal the toy and begin.",
+    'Teach "Out": with the toy in {{dog_possessive}} mouth, drop to {{dog_possessive}} level, hand on the toy, firm "OUT" + two firm lead pops. Wait for release — don\u2019t repeat the command, don\u2019t pull the toy out yourself.',
+    "Add a re-engage cue (a sound or word) that must be heard before {{dog_name}} is allowed back on the toy.",
+    "As play develops, you can rip the toy away just before {{dog_name}} latches on (max twice, then let {{dog_object}} win the third attempt)." ],
+    why:"We build frustration now so the rules become even more important — following commands in high-arousal states is a much-needed skill. This also gives {{dog_name}} a clear window to jump at people — that annoying thing {{dog_name}} does to visitors now has a dedicated time and place, only when invited.\n\nAdding rules to Play teaches {{dog_name}} that boundaries still apply even in high-arousal states — a rehearsal for real triggers later, where {{dog_name}} will need to keep {{dog_possessive}} head even when aroused." },
+
+  freedomWalk:{ title:'Freedom Walk with Long-Line', how:[
+    "Switch from a flexi lead to a long training line, letting {{dog_name}} experience real freedom.",
+    "Practice recall, falling back on the Phase 3 harsh correction if needed — by this point it should rarely be necessary." ],
+    why:"{{dog_name}} will start to love this new freedom. With freedom comes more distractions and more chances to blow off recall — this is still all practice for real triggers, so keep training exactly as before." },
+
+  playWeek67:{ title:'Play', how:[
+    "If Play drive is high, add mild obedience into the game — e.g. waiting in a down while the toy is thrown, rather than reacting the instant it\u2019s released.",
+    "You can also start using two leads now (green and red). The red lead is attached to the prong collar, the green lead to a flat collar. With a solid \u201cOUT,\u201d throw the toy and have {{dog_name}} remain in place. To further tap into {{dog_possessive}} drive, switch to the green lead, throw the toy, and release {{dog_name}} to get it — but hold {{dog_object}} back using the green lead. Don\u2019t fully prevent {{dog_name}} from getting the toy, but make {{dog_object}} pull you to it." ],
+    why:"This gives {{dog_name}} a clear understanding of when {{dog_name}} can pull through a collar, and when {{dog_name}} can\u2019t. If the only time in the last six weeks {{dog_name}} has pulled through a collar is because you released {{dog_object}} to get a toy, {{dog_name}} learns that pulling isn\u2019t allowed unless released. It also adds another level of competition and frustration to the game, which {{dog_name}} will be loving by now." },
+
+  redirectTriggers:{ title:'Redirect Exercise', how:[
+    "From Weeks 4 & 5 onward, this becomes about real triggers at a distance — other dogs, cats, birds, even \u201cstooge\u201d setups like people {{dog_name}} knows.",
+    "Start from a fair distance. Make sure {{dog_name}} has clearly seen the trigger before you mark and redirect away from it.",
+    "Over Weeks 4 & 5, gradually reduce the distance you\u2019re working at as {{dog_name}} succeeds.",
+    "From here on, keep closing the gap week by week (not day by day). Where possible, start walking alongside other dogs on the opposite side of the road, extending how long {{dog_name}} is exposed to the trigger.",
+    "Layer in the Super Focus redirection work already covered as the gap closes." ],
+    why:"This teaches {{dog_name}} that the marker, and returning to you for food, is worth more than a trigger at a distance. Closing the gap gradually — week by week rather than day by day — keeps {{dog_name}} succeeding rather than overwhelmed, the same 85% rule that\u2019s guided every stage so far." },
+
+  triggerWork:{ title:'Trigger Work', how:[
+    "Start looking for real triggers while {{dog_name}} is on a long line.",
+    "Lean on recall more than the Redirect Exercise to pull {{dog_name}} away from triggers.",
+    "Always mark, move, and pay once {{dog_name}} returns to you." ],
+    why:"This is the payoff stage where isolated skills (recall, redirect, punishment protocol) meet a genuine trigger for the first time." },
+
+  frontDoorSetups:{ title:'Front Door Set-ups', how:[
+    "Get {{dog_name}} onto {{dog_possessive}} place bed within view of the front door, tethered.",
+    "Walk out, close the door, wait a minute, come back in — walk straight past {{dog_object}}, ignoring {{dog_object}} completely. Once {{dog_name}} has stopped reacting, move to threshold manners.",
+    "Approach the open door on lead and stop before crossing. If {{dog_name}} pauses beside you, proceed calmly. If {{dog_name}} tries to get out first, or sits/lies down, return to the start and try again.",
+    "Goal: {{dog_name}} remains standing at the open door and waits for you to go first." ],
+    why:"This establishes that the doorway is yours to control — helping {{dog_name}} stay settled as you come and go, and preventing jumping up at visitors. Not letting {{dog_name}} sit or lie at the open door keeps anticipation of leaving low, since a sit/lie usually means a dog is expecting a reward — which we want to avoid right before a walk." },
+
+  place_w67:{ title:'Place', how:[
+    "Place work should now be easy and low-effort to maintain.",
+    "Deliberately ramp up distractions to keep testing reliability.",
+    "If {{dog_name}} is reliably calm at liberty, freedom can be allowed instead of confinement during downtime." ],
+    why:"{{dog_name}} has earned this freedom by proving {{dog_name}} can be calm in the house, and can decompress quickly following high-emotion states. As long as that continues, liberty can be granted. If old behaviours start slipping back through, return to confinement or tethering to stop them creeping back in." },
+};
+
+/* ---------------- Pre-requisite phase day data ---------------- */
+function genHandFeedingDays(){
+  const locs = ['Kitchen','Kitchen','Garden','Garden','Garden','Street (just outside the front of the house)','Street (just outside the front of the house)'];
+  return locs.map((loc,i)=>({ day:i+1, location:loc,
+    feeds:{ morning:[{type:'training',ex:['handFeeding'], location:loc}], evening:[{type:'training',ex:['handFeeding'], location:loc}] } }));
+}
+const NC_LOCATION_SEQUENCE = [
+  'Garden','Garden','Garden',
+  'Front Garden / Driveway','Front Garden / Driveway','Front Garden / Driveway',
+  'Street (Opposite Side to the House)','Street (Opposite Side to the House)','Street (Opposite Side to the House)',
+  'Grassy Area (Near the House)','Grassy Area (Near the House)','Grassy Area (Near the House)',
+  'Grassy Area (Further Away, Still Grassy)','Grassy Area (Further Away, Still Grassy)',
+];
+const NC_LOCATIONS = [
+  {name:'Garden', sessions:3},
+  {name:'Front Garden / Driveway', sessions:3},
+  {name:'Street (Opposite Side to the House)', sessions:3},
+  {name:'Grassy Area (Near the House)', sessions:3},
+  {name:'Grassy Area (Further Away, Still Grassy)', sessions:2},
+];
+function genNewtonsCradleDays(){
+  const counts=[5,10,15,5,10,15,5,10,15,5,10,15,5,10]; // 14 sessions, continuous rotation
+  const days=[];
+  for(let d=1; d<=7; d++){
+    const mIdx=(d-1)*2, eIdx=(d-1)*2+1;
+    const mLoc = NC_LOCATION_SEQUENCE[mIdx], eLoc = NC_LOCATION_SEQUENCE[eIdx];
+    days.push({ day:d, location: mLoc===eLoc ? mLoc : `${mLoc} \u2192 ${eLoc}`,
+      feeds:{
+        morning:[{type:'training',ex:['newtonsCradle'], setCount:counts[mIdx], location:mLoc}],
+        evening:[{type:'training',ex:['newtonsCradle'], setCount:counts[eIdx], location:eLoc}]
+      } });
+  }
+  return days;
+}
+
+/* ---------------- Main plan phase day data ---------------- */
+function T(...ex){ return {type:'training', ex}; }
+const PLAY = {type:'play'};
+const PLACE = {type:'place'};
+
+function genWeek1Days(){
+  const locs = ['Garden','Garden','Front Drive','Front Drive','Front Drive','Top of Road','Top of Road'];
+  return locs.map((loc,i)=>{
+    const day=i+1;
+    const eveningLoc = (day===5) ? 'Top of Road' : loc;
+    return {
+      day, location:loc, eveningLocation:eveningLoc,
+      sessions:{
+        morning:[ T('redirectExercise'), PLACE ],
+        afternoon:[ PLAY, PLACE, T('redirectExercise') ],
+        evening:[ PLAY, PLACE, T('redirectExercise','looseLeadWalking1') ],
+      }
+    };
+  });
+}
+function genWeeks23Days(){
+  const locs = {
+    8:'Garden Centre (Car Park)', 9:'Garden Centre (Car Park)',
+    10:'Grassy Area (Footpath Only)', 11:'Grassy Area (Footpath Only)',
+    12:'Pets at Home (Car Park)', 13:'Pets at Home (Car Park)',
+    14:'Grassy Area', 15:'Grassy Area',
+    16:'Park (Opposite Side of Road to Entrance)', 17:'Park (Opposite Side of Road to Entrance)',
+    18:'Runway Walk', 19:'Runway Walk',
+    20:'Addlington Golf Club', 21:'Addlington Golf Club',
+  };
+  const days=[];
+  for(let day=8; day<=21; day++){
+    days.push({ day, location:locs[day], recallPhase: day<10?1:2, recallTransition: day===10,
+      sessions:{
+        morning:[ T('recall23'), PLACE ],
+        afternoon:[ PLAY, PLACE, T('looseLeadPunishment','recall23') ],
+        evening:[ PLAY, PLACE, T('redirectExercise','recall23') ],
+      } });
+  }
+  return days;
+}
+function genWeeks45Days(){
+  const locs = {
+    22:'Park (Entrance Only)',
+    23:'Park (Inside, Near Child Play)', 24:'Park (Inside, Near Child Play)', 25:'Park (Inside, Near Child Play)',
+    26:'Local Caf\u00e9 (Outside)', 27:'Local Caf\u00e9 (Outside)', 28:'Local Caf\u00e9 (Outside)', 29:'Local Caf\u00e9 (Outside)',
+    30:'Aviator (Beer Garden)', 31:'Aviator (Beer Garden)', 32:'Aviator (Beer Garden)',
+    33:'Local Caf\u00e9 (Inside)', 34:'Local Caf\u00e9 (Inside)', 35:'Local Caf\u00e9 (Inside)',
+  };
+  const days=[];
+  for(let day=22; day<=35; day++){
+    days.push({ day, location:locs[day],
+      sessions:{
+        morning:[ T('superFocusPunishment'), PLACE ],
+        afternoon:[ PLAY, PLACE, T('recallLooseLead') ],
+        evening:[ PLAY, PLACE, T('phase3Recall') ],
+      } });
+  }
+  return days;
+}
+function genWeeks67Days(){
+  const locs = {
+    36:'Pets at Home (Self Groom)', 37:'Pets at Home (Self Groom)',
+    38:'Aviator (Inside)', 39:'Aviator (Inside)', 40:'Aviator (Inside)',
+    41:'Fletcher Moss (River Bank)', 42:'Fletcher Moss (River Bank)', 43:'Fletcher Moss (River Bank)', 44:'Fletcher Moss (River Bank)',
+    45:'Fletcher Moss (Perimeter/Path of Fields)', 46:'Fletcher Moss (Perimeter/Path of Fields)', 47:'Fletcher Moss (Perimeter/Path of Fields)',
+    48:'Fletcher Moss (Centre of Fields)', 49:'Fletcher Moss (Centre of Fields)',
+  };
+  const days=[];
+  for(let day=36; day<=49; day++){
+    days.push({ day, location:locs[day], eveningLocation:'Home',
+      sessions:{
+        morning:[ T('freedomWalk'), PLACE ],
+        afternoon:[ PLAY, PLACE, T('triggerWork') ],
+        evening:[ PLACE, T('frontDoorSetups') ],
+      } });
+  }
+  return days;
+}
+
+/* ---------------- Phase registry ---------------- */
+const PHASES = {
+  prePhaseA:{
+    id:'prePhaseA', kind:'pre', title:'Hand Feeding',
+    overview:"No bowl feeding at all — {{dog_possessive}} full meal is hand-fed, twice daily, progressing from the Kitchen to the Garden to the Street just outside the front of the house.",
+    exerciseKeys:['handFeeding'],
+    days: genHandFeedingDays(),
+  },
+  prePhaseB:{
+    id:'prePhaseB', kind:'pre', title:"Newton's Cradle",
+    overview:"A marker-timing feeding game — kibble thrown left, right, then a jackpot delivered on the move. Builds the meaning of the marker on top of last week\u2019s foundation.",
+    exerciseKeys:['newtonsCradle'],
+    days: genNewtonsCradleDays(),
+  },
+  week1:{
+    id:'week1', kind:'main', title:'Week 1', baseLabel:'Week 1',
+    overview:"Build a solid foundation for Play. Begin early use of the Redirect Exercise in more challenging environments.",
+    placeKey:'place_w1', playKey:'play1',
+    placeLevel:"Introduce Place. Reward calmly for getting onto the bed. Duration work with mild distraction. Add a back-tie if {{dog_name}} is making errors. If using food, don\u2019t reward too close after an error.",
+    weekRules:[
+      {t:'Daytime', b:'Keep {{dog_name}} crated or confined between sessions for calm structure.'},
+      {t:'Evening', b:'Calm interaction or structured tether time between sessions to help {{dog_name}} unwind — no play, no chatting during rest periods.'},
+      {t:'End of day', b:'Calm crate, tether, or cuddle time once settled.'},
+    ],
+    exerciseKeys:['redirectExercise','play1','looseLeadWalking1','place_w1','collarLeadDesensitisation'],
+    dailyTaskKey:'collarLeadDesensitisation',
+    days: genWeek1Days(),
+  },
+  'weeks2-3':{
+    id:'weeks2-3', kind:'main', title:'Weeks 2 & 3', baseLabel:'Weeks 2 & 3',
+    overview:"Start introducing rules to Play, start/end cues, and \u201cOut.\u201d Begin rehearsing the Punishment Protocol at home. Recall progresses from Phase 1 to Phase 2 on Day 10.",
+    placeKey:'place_w23', playKey:'playWithCues',
+    placeLevel:"Continue daily duration work with mild distraction; increase distractions if going well. Consider a back-tie if you can\u2019t stay fully attentive. Formal Place Training introduced as the evening variant — calm decompression.",
+    weekRules:[
+      {t:'Daytime', b:'{{dog_name}} remains crated or in considerable confinement.'},
+      {t:'Evening', b:'Formal Place Training now doubles as the calm decompression period.'},
+      {t:'End of day', b:'Cuddle time is fine, provided {{dog_name}} is calm.'},
+    ],
+    exerciseKeys:['recall23','looseLeadPunishment','redirectExercise','playWithCues','place_w23'],
+    days: genWeeks23Days(),
+  },
+  'weeks4-5':{
+    id:'weeks4-5', kind:'main', title:'Weeks 4 & 5', baseLabel:'Weeks 4 & 5',
+    overview:"Begin shifting arousal from Play into Place chill time. Begin rehearsing the Punishment Protocol away from home. Recall moves into Phase 3.",
+    placeKey:'place_w45', playKey:'playWithRules',
+    placeLevel:"Formal Place Training becomes the primary decompression method. Start spacing out food delivery and building patience; correct with lead pressure if needed. Occasionally drop food on purpose as a deliberate \u201ctest\u201d of duration and impulse control.",
+    weekRules:[
+      {t:'Daytime', b:'Crate or confinement maintained.'},
+      {t:'Evening', b:'Formal Place Training is now the primary decompression tool: spacing out food delivery, building patience.'},
+      {t:'End of day', b:'Cuddle up, providing {{dog_name}} is calm.'},
+    ],
+    exerciseKeys:['superFocusPunishment','recallLooseLead','phase3Recall','playWithRules','place_w45','redirectTriggers'],
+    days: genWeeks45Days(),
+  },
+  'weeks6-7':{
+    id:'weeks6-7', kind:'main', title:'Weeks 6 & 7', baseLabel:'Weeks 6 & 7',
+    overview:"Add obedience into Play. If a trigger is spotted, recall away and move into Focus work. Phase 3 recall should be fully proofed by now. Evenings drop Play and move to Front Door Set-ups at home.",
+    placeKey:'place_w67', playKey:'playWeek67',
+    placeLevel:"Place work should now be easy. Deliberately ramp up distractions. If {{dog_name}} is reliably calm at liberty, you can allow freedom instead of confinement during downtime.",
+    weekRules:[
+      {t:'Daytime', b:'Crate or confinement, though if {{dog_name}} is reliably calm at liberty, freedom can be allowed.'},
+      {t:'Evening', b:'Ramp up distractions intentionally during optional Place work to keep testing reliability.'},
+      {t:'End of day', b:'Cuddle away, if calm.'},
+    ],
+    exerciseKeys:['freedomWalk','triggerWork','frontDoorSetups','playWeek67','place_w67','redirectTriggers'],
+    days: genWeeks67Days(),
+  },
+};
+const MAIN_PHASE_ORDER = ['week1','weeks2-3','weeks4-5','weeks6-7'];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const STORAGE_KEY = 'dogtraining.state.v1';
+function defaultState(){
+  return {
+    onboarded:false,
+    onboardingStep:0,
+    onboardingDraft:{},
+    dogName:'', dogGender:'male',
+    startDate:null, // 'YYYY-MM-DD', a Monday
+    handFeedingAlreadyDone:false,
+    newtonsCradleAlreadyDone:false,
+    locationAssignments:{}, // {locationId: chosenLabel}
+    completedCount:0, // global index into ALL_DAYS sequence
+    settings:{},
+    ui:{ view:'journey', weekId:null, openDays:{}, exCarouselIndex:{}, modal:null, modalTab:'rules', settingsEditingLocations:false },
+  };
+}
+let STATE = loadState();
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed, { ui: defaultState().ui });
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  const {ui, ...persisted} = STATE;
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted)); }catch(e){}
+}
+
+/* ============================================================
+   DATE HELPERS (DST-safe: operate on local calendar components)
+   ============================================================ */
+function parseISODate(str){ const [y,m,d]=str.split('-').map(Number); return new Date(y, m-1, d); }
+function fmtISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function addDaysISO(iso, n){ const d=parseISODate(iso); d.setDate(d.getDate()+n); return fmtISO(d); }
+function todayISO(){ return fmtISO(new Date()); }
+function fmtDisplay(iso){
+  const d = parseISODate(iso);
+  return d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+}
+function nextMondays(count){
+  const out=[];
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  const dow = d.getDay(); // 0=Sun..6=Sat
+  let addToMonday = (8 - dow) % 7; // days until next Monday
+  if(dow===1) addToMonday = 0; // today is Monday, include it
+  const first = new Date(d); first.setDate(first.getDate()+addToMonday);
+  for(let i=0;i<count;i++){
+    const m = new Date(first); m.setDate(m.getDate() + i*7);
+    out.push(fmtISO(m));
+  }
+  return out;
+}
+
+/* ============================================================
+   JOURNEY SEQUENCING — flat ordered list of every day across
+   whichever phases are active, used for global one-at-a-time
+   gating and date computation.
+   ============================================================ */
+// Derivation per the confirmed skip logic in the scope doc
+function activePhaseIdsExplicit(){
+  const hand = STATE.handFeedingAlreadyDone, cradle = STATE.newtonsCradleAlreadyDone;
+  const ids=[];
+  if(hand===false){ ids.push('prePhaseA'); ids.push('prePhaseB'); }
+  else if(hand===true && cradle===false){ ids.push('prePhaseB'); }
+  // hand===true && cradle===true -> neither runs
+  MAIN_PHASE_ORDER.forEach(id=>ids.push(id));
+  return ids;
+}
+function buildAllDays(){
+  const flat=[];
+  activePhaseIdsExplicit().forEach(pid=>{
+    const phase = PHASES[pid];
+    phase.days.forEach(dayObj=>{
+      flat.push({ phaseId:pid, dayObj });
+    });
+  });
+  return flat;
+}
+function phaseStartIndex(phaseId, allDays){
+  const idx = allDays.findIndex(d=>d.phaseId===phaseId);
+  return idx;
+}
+function displayedLabel(phaseId){
+  const hand = STATE.handFeedingAlreadyDone, cradle = STATE.newtonsCradleAlreadyDone;
+  if(phaseId==='prePhaseA') return 'Week 1';
+  if(phaseId==='prePhaseB') return hand===false ? 'Week 2' : 'Week 1';
+  const handUsed = hand===false, cradleUsed = (hand===false || cradle===false);
+  const shift = (handUsed?1:0) + (cradleUsed?1:0);
+  const maps = {
+    'week1': ['Week 1','Week 2','Week 3'],
+    'weeks2-3': ['Weeks 2 & 3','Weeks 3 & 4','Weeks 4 & 5'],
+    'weeks4-5': ['Weeks 4 & 5','Weeks 5 & 6','Weeks 6 & 7'],
+    'weeks6-7': ['Weeks 6 & 7','Weeks 7 & 8','Weeks 8 & 9'],
+  };
+  return maps[phaseId][shift];
+}
+function phaseStatus(phaseId, allDays){
+  const start = phaseStartIndex(phaseId, allDays);
+  if(start===-1) return 'skipped';
+  const count = PHASES[phaseId].days.length;
+  const end = start+count; // exclusive
+  if(STATE.completedCount >= end) return 'complete';
+  if(STATE.completedCount >= start) return 'active';
+  return 'locked';
+}
+function dayGlobalIndex(phaseId, dayNumber, allDays){
+  return allDays.findIndex(d=>d.phaseId===phaseId && d.dayObj.day===dayNumber);
+}
+function dayStatus(globalIdx){
+  if(globalIdx < STATE.completedCount) return 'complete';
+  if(globalIdx === STATE.completedCount) return 'active';
+  return 'locked';
+}
+function dayScheduledDate(globalIdx){
+  if(!STATE.startDate) return null;
+  return addDaysISO(STATE.startDate, globalIdx);
+}
+function canCompleteDay(globalIdx){
+  if(dayStatus(globalIdx)!=='active') return false;
+  const sched = dayScheduledDate(globalIdx);
+  if(!sched) return true;
+  return todayISO() >= sched;
+}
+
+/* ============================================================
+   SMALL HELPERS
+   ============================================================ */
+function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function paraHtml(str){ return esc(str).split('\n\n').map(p=>`<p class="why-text">${p}</p>`).join(''); }
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(()=> el.classList.remove('show'), 2200);
+}
+function componentLabel(comp, phase){
+  if(comp.type==='play') return { title: EX[phase.playKey].title, sub:'Play', loc:'Garden' };
+  if(comp.type==='place') return { title: EX[phase.placeKey].title, sub:'Place (decompress)', loc:'Home', fixed:true };
+  const titles = comp.ex.map(k=>EX[k].title).join(' & ');
+  return { title: titles, sub:'Training', loc:null };
+}
+function exerciseCardHtml(exKey){
+  const ex = EX[exKey];
+  const howItems = ex.how.map(h=>`<li>${esc(P(h))}</li>`).join('');
+  return `<div class="ex-card">
+    <h3>${esc(P(ex.title))}</h3>
+    <div class="subhead">The How</div>
+    <ul>${howItems}</ul>
+    <div class="subhead">The Why</div>
+    ${paraHtml(P(ex.why))}
+  </div>`;
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+const OB_STEPS = ['welcome','handfeeding','newtonscradle','dogname','startdate','locations','review'];
+function obStepIndex(){
+  const key = STATE.ui.obStep || 'welcome';
+  return OB_STEPS.indexOf(key);
+}
+function obDotsHtml(){
+  // dots exclude welcome/review
+  const mid = ['handfeeding','newtonscradle','dogname','startdate','locations'];
+  const cur = STATE.ui.obStep;
+  const draft = STATE.onboardingDraft;
+  const visible = mid.filter(k => k!=='newtonscradle' || draft.handFeedingAlreadyDone===true);
+  return `<div class="progress-dots">${visible.map(k=>`<span class="${k===cur?'on':''}"></span>`).join('')}</div>`;
+}
+function goObStep(key){ STATE.ui.obStep = key; STATE.ui._obHistory = STATE.ui._obHistory||[]; render(); }
+function obNext(fromKey){
+  const draft = STATE.onboardingDraft;
+  const hist = STATE.ui._obHistory = STATE.ui._obHistory||[];
+  hist.push(fromKey);
+  let next;
+  if(fromKey==='welcome') next='handfeeding';
+  else if(fromKey==='handfeeding') next = draft.handFeedingAlreadyDone===true ? 'newtonscradle' : 'dogname';
+  else if(fromKey==='newtonscradle') next='dogname';
+  else if(fromKey==='dogname') next='startdate';
+  else if(fromKey==='startdate') next='locations';
+  else if(fromKey==='locations') next='review';
+  STATE.ui.obStep = next;
+  render();
+}
+function obBack(){
+  const hist = STATE.ui._obHistory||[];
+  const prev = hist.pop();
+  STATE.ui.obStep = prev || 'welcome';
+  render();
+}
+function renderOnboarding(){
+  const key = STATE.ui.obStep || 'welcome';
+  const draft = STATE.onboardingDraft;
+  if(key==='welcome') return obWelcome();
+  if(key==='handfeeding') return obHandFeeding();
+  if(key==='newtonscradle') return obNewtonsCradle();
+  if(key==='dogname') return obDogName();
+  if(key==='startdate') return obStartDate();
+  if(key==='locations') return obLocations();
+  if(key==='review') return obReview();
+  return obWelcome();
+}
+function obWelcome(){
+  return `<div class="onboard-screen">
+    <div class="onboard-brand">${brandMarkSvg(28,'var(--teal-900)')}</div>
+    <div class="onboard-hero">
+      <h1>A guided path through your dog's training.</h1>
+      <p>Hand Feeding, Newton's Cradle, and a 49-day main journey — one day unlocks at a time, with the How and the Why for every exercise along the way.</p>
+    </div>
+    <div class="onboard-actions">
+      <button class="btn btn-primary btn-block" data-action="ob-start">Begin setup</button>
+    </div>
+  </div>`;
+}
+function obHandFeeding(){
+  const draft = STATE.onboardingDraft;
+  return `<div class="onboard-screen">
+    ${obDotsHtml()}
+    <div class="step-eyebrow">Getting started</div>
+    <h2 class="step-q">Has your dog already completed Hand Feeding?</h2>
+    <p class="step-sub">Hand Feeding is the first pre-requisite week — no bowl, kibble hand-fed only.</p>
+    <div class="choice-list">
+      <button class="choice ${draft.handFeedingAlreadyDone===false?'selected':''}" data-action="ob-set" data-field="handFeedingAlreadyDone" data-value="false">No, we haven\u2019t started it yet</button>
+      <button class="choice ${draft.handFeedingAlreadyDone===true?'selected':''}" data-action="ob-set" data-field="handFeedingAlreadyDone" data-value="true">Yes, it\u2019s already done</button>
+    </div>
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="handfeeding" ${draft.handFeedingAlreadyDone===undefined?'disabled':''}>Continue</button>
+    </div>
+  </div>`;
+}
+function obNewtonsCradle(){
+  const draft = STATE.onboardingDraft;
+  return `<div class="onboard-screen">
+    ${obDotsHtml()}
+    <div class="step-eyebrow">Getting started</div>
+    <h2 class="step-q">Has your dog already completed Newton's Cradle?</h2>
+    <p class="step-sub">The marker-timing feeding game that follows Hand Feeding.</p>
+    <div class="choice-list">
+      <button class="choice ${draft.newtonsCradleAlreadyDone===false?'selected':''}" data-action="ob-set" data-field="newtonsCradleAlreadyDone" data-value="false">No, not yet</button>
+      <button class="choice ${draft.newtonsCradleAlreadyDone===true?'selected':''}" data-action="ob-set" data-field="newtonsCradleAlreadyDone" data-value="true">Yes, it\u2019s already done</button>
+    </div>
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="newtonscradle" ${draft.newtonsCradleAlreadyDone===undefined?'disabled':''}>Continue</button>
+    </div>
+  </div>`;
+}
+function obDogName(){
+  const draft = STATE.onboardingDraft;
+  const name = draft.dogName || '';
+  const gender = draft.dogGender;
+  return `<div class="onboard-screen">
+    ${obDotsHtml()}
+    <div class="step-eyebrow">Personalize</div>
+    <h2 class="step-q">Tell us about your dog</h2>
+    <p class="step-sub">This personalizes every How & Why card throughout the journey.</p>
+    <div class="field">
+      <label for="ob-dogname">Dog's name</label>
+      <input type="text" id="ob-dogname" placeholder="e.g. Biscuit" value="${esc(name)}" data-field="dogName" data-action="ob-input">
+    </div>
+    <div class="field">
+      <label>Gender</label>
+      <div class="gender-grid">
+        <button class="choice ${gender==='male'?'selected':''}" data-action="ob-set" data-field="dogGender" data-value="male">Male</button>
+        <button class="choice ${gender==='female'?'selected':''}" data-action="ob-set" data-field="dogGender" data-value="female">Female</button>
+      </div>
+    </div>
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="dogname" ${(!name.trim()||!gender)?'disabled':''}>Continue</button>
+    </div>
+  </div>`;
+}
+function obStartDate(){
+  const draft = STATE.onboardingDraft;
+  const mondays = nextMondays(8);
+  const items = mondays.map(m=>`<button class="choice ${draft.startDate===m?'selected':''}" data-action="ob-set" data-field="startDate" data-value="${m}">${fmtDisplay(m)}</button>`).join('');
+  return `<div class="onboard-screen">
+    ${obDotsHtml()}
+    <div class="step-eyebrow">Schedule</div>
+    <h2 class="step-q">When should the journey begin?</h2>
+    <p class="step-sub">Pick the Monday you\u2019ll start. Everything after this — pre-requisite weeks included — runs daily from here.</p>
+    <div class="choice-list">${items}</div>
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="startdate" ${!draft.startDate?'disabled':''}>Continue</button>
+    </div>
+  </div>`;
+}
+function obLocations(){
+  const draft = STATE.onboardingDraft;
+  draft.locationAssignments = draft.locationAssignments || {};
+  const items = LOCATIONS.map(loc=>{
+    const typed = draft.locationAssignments[loc.id] !== undefined ? draft.locationAssignments[loc.id] : '';
+    return `<div class="loc-setup-item">
+      <div class="idx">LOCATION ${loc.id} OF 20</div>
+      <div class="desc">${esc(loc.desc.replace(/\{\{dog_name\}\}/g,'your dog'))}</div>
+      <input type="text" value="${esc(typed)}" placeholder="${esc(loc.name)}" data-action="ob-loc-input" data-locid="${loc.id}">
+    </div><hr class="divider">`;
+  }).join('');
+  return `<div class="onboard-screen">
+    ${obDotsHtml()}
+    <div class="step-eyebrow">Your 20 locations</div>
+    <h2 class="step-q">Where will each stage happen?</h2>
+    <p class="step-sub">Match each fixed slot to a real place near you — the greyed-out text is just a suggestion. Every one is editable later in Settings.</p>
+    ${items}
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="locations">Continue</button>
+    </div>
+  </div>`;
+}
+function obReview(){
+  const draft = STATE.onboardingDraft;
+  const hand = draft.handFeedingAlreadyDone;
+  const cradle = draft.newtonsCradleAlreadyDone;
+  let startsWith;
+  if(hand===false) startsWith = 'Hand Feeding';
+  else if(cradle===false) startsWith = "Newton's Cradle";
+  else startsWith = 'Week 1 of the main plan';
+  return `<div class="onboard-screen">
+    <div class="step-eyebrow">All set</div>
+    <h2 class="step-q">Ready for ${esc(draft.dogName||'your dog')}\u2019s journey</h2>
+    <p class="step-sub">Starting ${fmtDisplay(draft.startDate)}, beginning with <b>${esc(startsWith)}</b>. You can revisit locations and settings any time.</p>
+    <div class="golden-banner">
+      <div class="gt">Golden rules, throughout</div>
+      <ul style="margin:0;padding-left:18px;">${GOLDEN_RULES.map(r=>`<li>${esc(personalize(r.body, draft))}</li>`).join('')}</ul>
+    </div>
+    <div class="onboard-footer">
+      <button class="btn btn-ghost" data-action="ob-back">Back</button>
+      <button class="btn btn-primary btn-block" data-action="ob-finish">Start the journey</button>
+    </div>
+  </div>`;
+}
+function brandMarkSvg(size, color){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}"><ellipse cx="12" cy="16" rx="5.4" ry="4.6"/><ellipse cx="4.6" cy="9.5" rx="2.3" ry="3"/><ellipse cx="9.4" cy="5.6" rx="2.3" ry="3"/><ellipse cx="14.6" cy="5.6" rx="2.3" ry="3"/><ellipse cx="19.4" cy="9.5" rx="2.3" ry="3"/></svg>`;
+}
+
+/* ============================================================
+   JOURNEY (trail map) VIEW
+   ============================================================ */
+function renderJourney(){
+  const allDays = buildAllDays();
+  const ids = activePhaseIdsExplicit();
+  const nodes = ids.map(pid=>{
+    const phase = PHASES[pid];
+    const status = phaseStatus(pid, allDays);
+    const label = displayedLabel(pid);
+    const dayCount = phase.days.length;
+    return {pid, phase, status, label, dayCount};
+  });
+  const dogName = STATE.dogName || 'your dog';
+  const rows = nodes.map(n=>{
+    const icon = n.status==='complete' ? ICON.check : n.status==='locked' ? ICON.lock : (n.pid.startsWith('pre') ? '' : '');
+    const dotContent = n.status==='complete' ? ICON.check : (n.status==='locked' ? ICON.lock : (n.dayCount));
+    return `<div class="node-row ${n.status}">
+      <div class="trail-connector"></div>
+      <div class="node-dot-wrap"><div class="node-dot">${n.status==='active' ? n.dayCount+'d' : dotContent}</div></div>
+      <button class="node-card" data-action="open-week" data-phase="${n.pid}" ${n.status==='locked'?'disabled':''}>
+        <div class="label">${esc(n.label)}${n.pid.startsWith('pre') ? ' \u2014 '+esc(n.phase.title) : ''}</div>
+        <div class="goal">${esc(P(n.phase.overview))}</div>
+        <div class="meta-row">
+          <span class="pill pill-${n.status==='complete'?'complete':n.status==='active'?'active':'locked'}">${n.status==='complete'?'Complete':n.status==='active'?'In progress':'Locked'}</span>
+        </div>
+      </button>
+    </div>`;
+  }).join('');
+  return `
+    <div class="top-nav">
+      <div class="row" style="gap:8px;">${brandMarkSvg(22,'var(--teal-700)')}</div>
+      <button class="icon-btn" data-action="open-golden">${ICON.info}</button>
+    </div>
+    <div class="journey-wrap">
+      <div class="journey-hero">
+        <div class="eyebrow">${esc(dogName)}\u2019s journey</div>
+        <h1>The trail ahead</h1>
+        <p>Tap a stage to see the how, the why, and today\u2019s sessions. You can always look back — never ahead.</p>
+      </div>
+      <div class="trail">${rows}</div>
+    </div>
+    <button class="fab-settings" data-action="open-settings" aria-label="Settings">${ICON.settings}</button>
+  `;
+}
+
+/* ============================================================
+   WEEK DETAIL VIEW
+   ============================================================ */
+function renderWeekDetail(phaseId){
+  const phase = PHASES[phaseId];
+  const allDays = buildAllDays();
+  const isPre = phase.kind==='pre';
+  const label = displayedLabel(phaseId);
+  const status = phaseStatus(phaseId, allDays);
+
+  // exercise carousel
+  const exKeys = phase.exerciseKeys;
+  const idx = STATE.ui.exCarouselIndex[phaseId] || 0;
+  const carouselCards = exKeys.map(k=>exerciseCardHtml(k)).join('');
+  const dots = exKeys.map((k,i)=>`<span class="${i===idx?'on':''}"></span>`).join('');
+
+  // days list
+  const daysHtml = phase.days.map(d=>{
+    const gIdx = dayGlobalIndex(phaseId, d.day, allDays);
+    const st = dayStatus(gIdx);
+    const sched = dayScheduledDate(gIdx);
+    const open = !!STATE.ui.openDays[phaseId+':'+d.day];
+    const locLabel = isPre ? d.location : resolveLocationLabel(d.location);
+    let sessionsHtml;
+    if(isPre){
+      sessionsHtml = ['morning','evening'].map(sk=>{
+        const comps = d.feeds[sk];
+        return sessionBlockHtml(sk, comps, phase, d, isPre);
+      }).join('');
+    } else {
+      sessionsHtml = ['morning','afternoon','evening'].map(sk=>{
+        const comps = d.sessions[sk];
+        return sessionBlockHtml(sk, comps, phase, d, isPre);
+      }).join('');
+    }
+    const canComplete = canCompleteDay(gIdx);
+    const dailyTaskHtml = phase.dailyTaskKey ? `<div class="session-block"><div class="session-name">Daily task</div><div class="component-chain"><div class="component"><div class="dot"></div><div><div class="ctext"><b>${esc(P(EX[phase.dailyTaskKey].title))}</b></div><div class="cloc">Home \u00b7 anytime during the day</div></div></div></div></div>` : '';
+    let lockedNote = '';
+    if(st==='locked'){
+      lockedNote = `<div class="day-locked-note">${ICON.lock}<span>Complete the current day first to unlock this one.</span></div>`;
+    } else if(st==='active' && !canComplete){
+      lockedNote = `<div class="day-locked-note">${ICON.calendar}<span>Unlocks ${fmtDisplay(sched)}.</span></div>`;
+    }
+    const completeBtn = (st==='active') ? `<div class="complete-btn-wrap"><button class="btn btn-primary btn-block" data-action="complete-day" data-phase="${phaseId}" data-day="${d.day}" ${canComplete?'':'disabled'}>Mark day complete</button></div>` : '';
+    return `<div class="day-row ${st} ${open?'open':''}">
+      <button class="day-row-head" data-action="toggle-day" data-phase="${phaseId}" data-day="${d.day}">
+        <div class="left">
+          <div class="day-badge">${st==='complete'?ICON.check:st==='locked'?ICON.lock:d.day}</div>
+          <div>
+            <div class="day-title">Day ${d.day}${isPre?'':''}</div>
+            <div class="day-sub">${esc(locLabel)}${sched?' \u00b7 '+fmtDisplay(sched).split(',')[0]+' '+fmtDisplay(sched).split(' ').slice(1).join(' '):''}</div>
+          </div>
+        </div>
+        <div class="chev">${ICON.chevDown}</div>
+      </button>
+      <div class="day-body"><div class="day-body-inner">
+        ${sessionsHtml}
+        ${dailyTaskHtml}
+        ${lockedNote}
+        ${completeBtn}
+      </div></div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="detail-header">
+      <div class="back-row">
+        <button class="back-btn" data-action="back-to-journey">${ICON.back}</button>
+        <div class="row" style="gap:8px;">
+          <button class="icon-btn-dark" data-action="open-location" data-phase="${phaseId}">${ICON.pin}</button>
+          <button class="icon-btn-dark" data-action="open-info" data-phase="${phaseId}">${ICON.info}</button>
+        </div>
+      </div>
+      <div class="phase-eyebrow">${isPre?'Pre-requisite':'Main plan'} \u00b7 ${status==='complete'?'Complete':status==='active'?'In progress':'Locked'}</div>
+      <h1>${esc(label)}${isPre?' \u2014 '+esc(phase.title):''}</h1>
+      <p class="overview">${esc(P(phase.overview))}</p>
+    </div>
+    <div class="section-label">This week's exercises</div>
+    <div class="carousel" id="ex-carousel" data-phase="${phaseId}">${carouselCards}</div>
+    <div class="carousel-dots">${dots}</div>
+    <div class="section-label">Days</div>
+    <div class="days-list">${daysHtml}</div>
+  `;
+}
+function resolveLocationLabel(baseName){
+  const loc = LOC_BY_NAME[baseName];
+  if(!loc) return baseName;
+  const assigned = STATE.locationAssignments[loc.id];
+  return assigned ? assigned : baseName;
+}
+function sessionBlockHtml(sessionKey, comps, phase, dayObj, isPre){
+  const label = sessionKey.charAt(0).toUpperCase()+sessionKey.slice(1);
+  let compsHtml;
+  if(isPre){
+    const c = comps[0];
+    const setCount = c.setCount ? ` \u2014 ${c.setCount} sets` : '';
+    compsHtml = `<div class="component"><div class="dot"></div><div><div class="ctext"><b>${esc(EX[c.ex[0]].title)}</b>${esc(setCount)}</div><div class="cloc">${esc(c.location||dayObj.location)}</div></div></div>`;
+  } else {
+    compsHtml = comps.map(c=>{
+      const info = componentLabel(c, phase);
+      let loc = info.loc;
+      if(loc==null){
+        loc = resolveLocationLabel((sessionKey==='evening' && dayObj.eveningLocation) ? dayObj.eveningLocation : dayObj.location);
+      } else if(!info.fixed){
+        loc = resolveLocationLabel(loc);
+      }
+      return `<div class="component"><div class="dot"></div><div><div class="ctext"><b>${esc(info.title)}</b> \u2014 ${esc(info.sub)}</div><div class="cloc">${esc(loc)}</div></div></div>`;
+    }).join('');
+  }
+  return `<div class="session-block"><div class="session-name">${esc(label)}</div><div class="component-chain">${compsHtml}</div></div>`;
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modalShell(title, bodyHtml, extraHead){
+  return `<div class="modal-backdrop" data-action="close-modal">
+    <div class="modal-sheet" data-stop="1">
+      <div class="modal-grabber"></div>
+      <div class="modal-head"><h2>${esc(title)}</h2><button class="modal-close" data-action="close-modal">${ICON.close}</button></div>
+      ${extraHead||''}
+      <div class="modal-body">${bodyHtml}</div>
+    </div>
+  </div>`;
+}
+function phaseLocationsUsed(phaseId){
+  const phase = PHASES[phaseId];
+  if(phase.kind==='pre'){
+    if(phaseId==='prePhaseA'){
+      const ranges = [];
+      let cur=null;
+      phase.days.forEach(d=>{
+        if(cur && cur.name===d.location){ cur.to=d.day; }
+        else { cur={name:d.location, from:d.day, to:d.day}; ranges.push(cur); }
+      });
+      return ranges.map(r=>({name:r.name, desc:`Days ${r.from}\u2013${r.to} of Hand Feeding.`}));
+    }
+    return NC_LOCATIONS.map(l=>({name:l.name, desc:`${l.sessions} feeding session${l.sessions===1?'':'s'} across the week.`}));
+  }
+  const names = new Set();
+  phase.days.forEach(d=>{ names.add(d.location); if(d.eveningLocation) names.add(d.eveningLocation); });
+  names.add('Garden'); // Play always here
+  return [...names].map(name=>{
+    const loc = LOC_BY_NAME[name];
+    return { name, desc: loc ? loc.desc : '', locId: loc?loc.id:null };
+  });
+}
+function renderLocationModal(phaseId){
+  const items = phaseLocationsUsed(phaseId);
+  const html = items.map(it=>{
+    const chosen = it.locId ? (STATE.locationAssignments[it.locId] || it.name) : it.name;
+    return `<div class="loc-item">
+      ${it.locId?`<div class="num">LOCATION ${it.locId}</div>`:''}
+      <div class="chosen">${esc(chosen)}</div>
+      <div class="desc">${esc(P(it.desc))}</div>
+    </div>`;
+  }).join('');
+  return modalShell('Locations used this stage', html);
+}
+function renderInfoModal(phaseId){
+  const phase = PHASES[phaseId];
+  const tab = STATE.ui.modalTab || 'rules';
+  const tabs = `<div class="tabs">
+    <button class="tab-btn ${tab==='rules'?'on':''}" data-action="modal-tab" data-tab="rules">Rules</button>
+    <button class="tab-btn ${tab==='glossary'?'on':''}" data-action="modal-tab" data-tab="glossary">Glossary</button>
+  </div>`;
+  let body;
+  if(tab==='rules'){
+    const golden = `<div class="rule-item"><div class="rtitle">Golden rules (always)</div>${GOLDEN_RULES.map(r=>`<p>\u2022 <b>${esc(r.title)}.</b> ${esc(P(r.body))}</p>`).join('')}</div>`;
+    let phaseRules = '';
+    if(phase.kind==='main'){
+      phaseRules = phase.weekRules.map(r=>`<div class="rule-item"><div class="rtitle">${esc(r.t)}</div><p>${esc(P(r.b))}</p></div>`).join('')
+        + `<div class="rule-item"><div class="rtitle">Place level this stage</div><p>${esc(P(phase.placeLevel))}</p></div>`;
+    } else if(phaseId==='prePhaseA'){
+      phaseRules = `<div class="rule-item"><div class="rtitle">Kibble only</div><p>${esc(P('No bowl feeding at all; no wet food. Only kibble, hand-fed, twice daily.'))}</p></div>`;
+    } else {
+      phaseRules = `<div class="rule-item"><div class="rtitle">On a flexi lead</div><p>${esc(P('{{dog_name}} stays on a flexi lead throughout every feed.'))}</p></div>`;
+    }
+    body = golden + phaseRules;
+  } else {
+    body = `<dl style="margin:0;">${GLOSSARY.map(g=>`<div class="glossary-item"><dt>${esc(g.term)}</dt><dd>${esc(P(g.def))}</dd></div>`).join('')}</dl>`;
+  }
+  return modalShell(displayedLabel(phaseId)+' \u2014 Info', body, tabs);
+}
+function renderGoldenModal(){
+  const body = GOLDEN_RULES.map(r=>`<div class="rule-item"><div class="rtitle">${esc(r.title)}</div><p>${esc(P(r.body))}</p></div>`).join('');
+  return modalShell('Golden rules', body);
+}
+
+/* ============================================================
+   SETTINGS VIEW
+   ============================================================ */
+function renderSettings(){
+  const s = STATE;
+  const locItems = LOCATIONS.map(loc=>{
+    const val = s.locationAssignments[loc.id] || loc.name;
+    return `<div class="loc-setup-item">
+      <div class="idx">LOCATION ${loc.id} OF 20</div>
+      <div class="desc">${esc(P(loc.desc))}</div>
+      <input type="text" value="${esc(val)}" data-action="settings-loc-input" data-locid="${loc.id}">
+    </div><hr class="divider">`;
+  }).join('');
+  return `
+    <div class="top-nav">
+      <button class="icon-btn" data-action="back-to-journey">${ICON.back}</button>
+      <span class="title">Settings</span>
+      <span style="width:38px"></span>
+    </div>
+    <div class="settings-section">
+      <h3>Dog</h3>
+      <div class="field"><label>Name</label><input type="text" value="${esc(s.dogName)}" data-action="settings-input" data-field="dogName"></div>
+      <div class="field" style="margin-bottom:4px;"><label>Gender</label>
+        <div class="gender-grid">
+          <button class="choice ${s.dogGender==='male'?'selected':''}" data-action="settings-set" data-field="dogGender" data-value="male">Male</button>
+          <button class="choice ${s.dogGender==='female'?'selected':''}" data-action="settings-set" data-field="dogGender" data-value="female">Female</button>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <h3>Schedule</h3>
+      <div class="setting-row">
+        <div><div class="lbl">Start date</div><div class="desc">${s.startDate?fmtDisplay(s.startDate):'Not set'}</div></div>
+        <button class="btn btn-plain btn-sm" data-action="open-restart-date">Change</button>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <h3>Locations</h3>
+      <p class="faint" style="margin:-4px 0 14px;">Editable any time — changes apply everywhere that location is referenced.</p>
+      ${locItems}
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <h3>Backup</h3>
+      <p class="faint" style="margin:-4px 0 14px;">Your progress lives only in this browser. Export a backup before clearing history/cache, switching devices, or reinstalling.</p>
+      <div class="setting-row">
+        <div><div class="lbl">Export backup</div><div class="desc">Downloads a JSON file with everything \u2014 dog details, locations, and progress.</div></div>
+        <button class="btn btn-plain btn-sm" data-action="export-backup">Export</button>
+      </div>
+      <div class="setting-row">
+        <div><div class="lbl">Restore from backup</div><div class="desc">Replaces everything currently in this app with the backup file.</div></div>
+        <button class="btn btn-plain btn-sm" data-action="trigger-restore">Restore</button>
+      </div>
+      <input type="file" id="restore-file-input" accept="application/json,.json" style="display:none;">
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <h3>Reference</h3>
+      <div class="setting-row"><div class="lbl">Golden rules</div><button class="btn btn-plain btn-sm" data-action="open-golden">View</button></div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <h3>Danger zone</h3>
+      <button class="btn btn-danger btn-block" data-action="open-reset-confirm">Reset all progress</button>
+    </div>
+  `;
+}
+function renderRestartDateModal(){
+  const mondays = nextMondays(8);
+  const items = mondays.map(m=>`<button class="choice ${STATE.startDate===m?'selected':''}" data-action="set-startdate" data-value="${m}">${fmtDisplay(m)}</button>`).join('');
+  return modalShell('Change start date', `<p class="faint" style="margin-top:0;">Changing this shifts every scheduled date. It does not affect what\u2019s already marked complete.</p><div class="choice-list">${items}</div>`);
+}
+function renderResetConfirmModal(){
+  return modalShell('Reset all progress?', `
+    <p class="faint" style="margin-top:0;">Every day goes back to locked and the journey starts over from Day 1. Dog details, gender, start date, and your 20 locations are all kept.</p>
+    <p class="faint">This can\u2019t be undone.</p>
+    <div class="onboard-footer" style="margin-top:20px;">
+      <button class="btn btn-ghost" data-action="close-modal">Cancel</button>
+      <button class="btn btn-danger" data-action="confirm-reset-progress">Reset progress</button>
+    </div>
+  `);
+}
+
+/* ============================================================
+   BACKUP — export / restore full app state as a JSON file
+   ============================================================ */
+function exportBackup(){
+  const {ui, ...persisted} = STATE;
+  const payload = { app:'dog-training-journey-backup', version:1, exportedAt:new Date().toISOString(), state:persisted };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dog-training-backup-${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  toast('Backup downloaded.');
+}
+function restoreBackupFromFile(file){
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      const incoming = (parsed && parsed.state && typeof parsed.state === 'object') ? parsed.state : parsed;
+      if(!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) throw new Error('not a backup object');
+      const ui = STATE.ui;
+      STATE = Object.assign(defaultState(), incoming, { ui });
+      saveState();
+      toast('Backup restored.');
+      render();
+    }catch(err){
+      toast('That file doesn\u2019t look like a valid backup.');
+    }
+  };
+  reader.onerror = ()=> toast('Couldn\u2019t read that file.');
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   ROOT RENDER
+   ============================================================ */
+function render(){
+  const app = document.getElementById('app');
+  let html;
+  if(!STATE.onboarded){
+    html = renderOnboarding();
+  } else if(STATE.ui.view==='settings'){
+    html = renderSettings();
+  } else if(STATE.ui.view==='week' && STATE.ui.weekId){
+    html = renderWeekDetail(STATE.ui.weekId);
+  } else {
+    html = renderJourney();
+  }
+  if(STATE.ui.modal==='location') html += renderLocationModal(STATE.ui.weekId);
+  else if(STATE.ui.modal==='info') html += renderInfoModal(STATE.ui.weekId);
+  else if(STATE.ui.modal==='golden') html += renderGoldenModal();
+  else if(STATE.ui.modal==='restart-date') html += renderRestartDateModal();
+  else if(STATE.ui.modal==='reset-confirm') html += renderResetConfirmModal();
+  app.innerHTML = html;
+  // restore carousel scroll position + wire scroll listener for dots
+  if(STATE.ui.view==='week' && STATE.ui.weekId){
+    const car = document.getElementById('ex-carousel');
+    if(car){
+      const phase = PHASES[STATE.ui.weekId];
+      const savedIdx = STATE.ui.exCarouselIndex[STATE.ui.weekId] || 0;
+      const cardW = car.firstElementChild ? car.firstElementChild.getBoundingClientRect().width + 12 : 0;
+      if(savedIdx>0) car.scrollLeft = savedIdx * cardW;
+      car.addEventListener('scroll', ()=>{
+        clearTimeout(car.__t);
+        car.__t = setTimeout(()=>{
+          const w = car.firstElementChild ? car.firstElementChild.getBoundingClientRect().width + 12 : 1;
+          const i = Math.round(car.scrollLeft / w);
+          if(STATE.ui.exCarouselIndex[STATE.ui.weekId] !== i){
+            STATE.ui.exCarouselIndex[STATE.ui.weekId] = i;
+            const dotsEl = document.querySelector('.carousel-dots');
+            if(dotsEl){
+              [...dotsEl.children].forEach((el,idx)=> el.classList.toggle('on', idx===i));
+            }
+          }
+        }, 80);
+      }, {passive:true});
+    }
+  }
+}
+
+/* ============================================================
+   DISPATCH — single delegated click handler
+   ============================================================ */
+function closeModalWithFlash(){
+  const wasInfo = STATE.ui.modal==='info';
+  STATE.ui.modal=null;
+  render();
+  if(wasInfo){
+    const btn = document.querySelector('[data-action="open-info"]');
+    if(btn){
+      btn.classList.add('flash-red');
+      setTimeout(()=>{ btn.classList.remove('flash-red'); }, 900);
+    }
+  }
+}
+document.addEventListener('click', function(e){
+  const backdrop = e.target.closest('.modal-backdrop');
+  if(backdrop && !e.target.closest('[data-stop]')){
+    closeModalWithFlash(); return;
+  }
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const action = t.dataset.action;
+  const draft = STATE.onboardingDraft;
+
+  switch(action){
+    case 'ob-start': goObStep('handfeeding'); STATE.ui._obHistory=['welcome']; render(); break;
+    case 'ob-set': {
+      const field = t.dataset.field; let val = t.dataset.value;
+      if(val==='true') val=true; else if(val==='false') val=false;
+      draft[field]=val; render(); break;
+    }
+    case 'ob-continue': obNext(t.dataset.from); break;
+    case 'ob-back': obBack(); break;
+    case 'ob-finish': {
+      STATE.dogName = draft.dogName.trim();
+      STATE.dogGender = draft.dogGender || 'male';
+      STATE.startDate = draft.startDate;
+      STATE.handFeedingAlreadyDone = !!draft.handFeedingAlreadyDone;
+      STATE.newtonsCradleAlreadyDone = draft.handFeedingAlreadyDone ? !!draft.newtonsCradleAlreadyDone : false;
+      STATE.locationAssignments = {};
+      LOCATIONS.forEach(loc=>{ STATE.locationAssignments[loc.id] = (draft.locationAssignments && draft.locationAssignments[loc.id]) || loc.name; });
+      STATE.completedCount = 0;
+      STATE.onboarded = true;
+      saveState();
+      toast('Journey started \u2014 welcome, '+STATE.dogName+'!');
+      render(); break;
+    }
+    case 'open-week': {
+      if(t.disabled) break;
+      const phaseId = t.dataset.phase;
+      STATE.ui.view='week'; STATE.ui.weekId=phaseId; STATE.ui.modal=null;
+      const allDays = buildAllDays();
+      const startIdx = phaseStartIndex(phaseId, allDays);
+      if(STATE.completedCount === startIdx){
+        STATE.ui.modal='info'; STATE.ui.modalTab='rules';
+      }
+      render(); break;
+    }
+    case 'back-to-journey': STATE.ui.view='journey'; STATE.ui.weekId=null; STATE.ui.modal=null; render(); break;
+    case 'open-settings': STATE.ui.view='settings'; STATE.ui.modal=null; render(); break;
+    case 'open-location': STATE.ui.modal='location'; STATE.ui.weekId = t.dataset.phase || STATE.ui.weekId; render(); break;
+    case 'open-info': STATE.ui.modal='info'; STATE.ui.modalTab='rules'; STATE.ui.weekId = t.dataset.phase || STATE.ui.weekId; render(); break;
+    case 'open-golden': STATE.ui.modal='golden'; render(); break;
+    case 'close-modal': closeModalWithFlash(); break;
+    case 'modal-tab': STATE.ui.modalTab = t.dataset.tab; render(); break;
+    case 'toggle-day': {
+      const key = t.dataset.phase+':'+t.dataset.day;
+      STATE.ui.openDays[key] = !STATE.ui.openDays[key];
+      render(); break;
+    }
+    case 'complete-day': {
+      const phaseId = t.dataset.phase, day = Number(t.dataset.day);
+      const allDays = buildAllDays();
+      const gIdx = dayGlobalIndex(phaseId, day, allDays);
+      if(!canCompleteDay(gIdx)) break;
+      STATE.completedCount = gIdx+1;
+      saveState();
+      toast('Day '+day+' marked complete.');
+      const phase = PHASES[phaseId];
+      const isLastDayOfPhase = phase.days[phase.days.length-1].day === day;
+      STATE.ui.openDays[phaseId+':'+day] = false;
+      if(isLastDayOfPhase){
+        STATE.ui.view = 'journey';
+        STATE.ui.weekId = null;
+        STATE.ui.modal = null;
+      } else {
+        STATE.ui.openDays[phaseId+':'+(day+1)] = true;
+      }
+      render(); break;
+    }
+    case 'settings-set': {
+      STATE[t.dataset.field] = t.dataset.value;
+      saveState(); render(); break;
+    }
+    case 'export-backup': exportBackup(); break;
+    case 'trigger-restore': {
+      const input = document.getElementById('restore-file-input');
+      if(input) input.click();
+      break;
+    }
+    case 'open-restart-date': STATE.ui.modal='restart-date'; render(); break;
+    case 'set-startdate': {
+      STATE.startDate = t.dataset.value;
+      saveState(); STATE.ui.modal=null; toast('Start date updated.'); render(); break;
+    }
+    case 'open-reset-confirm': STATE.ui.modal='reset-confirm'; render(); break;
+    case 'confirm-reset-progress': {
+      STATE.completedCount = 0;
+      STATE.ui.openDays = {};
+      STATE.ui.modal = null;
+      saveState();
+      toast('Progress reset.');
+      render();
+      break;
+    }
+    default: break;
+  }
+}, false);
+
+document.addEventListener('input', function(e){
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  if(action==='ob-input'){
+    STATE.onboardingDraft[el.dataset.field] = el.value;
+  } else if(action==='ob-loc-input'){
+    STATE.onboardingDraft.locationAssignments = STATE.onboardingDraft.locationAssignments || {};
+    STATE.onboardingDraft.locationAssignments[el.dataset.locid] = el.value;
+  } else if(action==='settings-input'){
+    STATE[el.dataset.field] = el.value;
+    saveState();
+  } else if(action==='settings-loc-input'){
+    STATE.locationAssignments[el.dataset.locid] = el.value;
+    saveState();
+  }
+}, false);
+
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'restore-file-input'){
+    const file = e.target.files && e.target.files[0];
+    if(file) restoreBackupFromFile(file);
+    e.target.value = '';
+  }
+}, false);
+
+/* ============================================================
+   PWA install metadata (inlined so the whole app is one file)
+   ============================================================ */
+(function setupPWAMeta(){
+  const ICON_B64 = "iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAFeUlEQVR4nO3dy3EbRxQF0CHLe+egMFzlNLRXZN47DVYpDOfACOQFBQkkgcF8unum+56zdJmYD+/t1wBH5NN0En/+/dePo8+Bdl5fvj8dfQ7TNE2HnYTAc+2oQjQ9qNCzRMsyVD+Q0LNH7TJUe3HBp6RaRSj+ooJPTaWL8FzyxYSf2kpnrEibBJ8jlJgGuyeA8HOUEtnbVQDh52h7M7hphAg+Z7RlS7R6Agg/Z7Ulm6sKIPyc3dqMLi6A8NOLNVkt+nMA6M2iAlj96c3SzD4sgPDTqyXZnS2A8NO7Rxn2HoBodwtg9WcUc1m+WQDhZzT3Mm0LRLRPBbD6M6pb2TYBiPauAFZ/Rvcx4yYA0RSAaL8KYPtDiuusmwBEUwCiPU+T7Q95Lpk3AYimAERTAKI92f+TzAQgmgIQTQGIpgBE++PoExjJf//+c/O/f/n6rcvjJPAp0E73wnjP1pC2Ok4aW6Ad1oby7F+TyATYoFS4Hq3SrY6TzARYqeTKOvdarY6TTgGIpgAr1FhJb71mq+OgAIvVDND1a7c6Dm8UgGgKQDQfgy4w2tbBx6K/mQBEUwCiKQDRop4G9RTlvMT7M3wBlryBvf5/Rv5m35J+f4beApV6irLFN/3L12/NjnPhKdNBJ8Deb9Ll60db7S7cn9+GmwCeopzn/rw3XAFqqbnaXb92q+PwZqgC1H6KskaAbr1mreN4yvSzYQrgKcp57s9twxSglZKr89xrtTpOuiE/BartEqitK9/SQLY6TrIhJkCLEVzq5wNHfM1R96cHJsBOS4JWYiVudZw0ClBQqwAKejlDbIFgKwUgmgIQbYgCtH6Ksjfuz31DFAC2UgCiDVMAT1HOc39uG6YA09Tuac1euT+fDVUAWGu4AniKcp77897QvxrRU5Tz3J8BJ8C1Vk9e9sr9GXwCfOQpynmJ9yeqAPDR0FsgeEQBiKYARFMAoikA0RSAaApANAUgmgIQTQGIpgBEUwCiKQDRFIBoCkA0BSCaAhBNAYjmD2Q0tOa3MIz873DPxL8JrqTG38xSivIUoLAWfyxOEcpRgAKO/AuJyrCPN8E7Hf3nQY8+fu9MgI3OGDzTYD0TYIMzhn+aznteZ2YCrNBTwEyDZUyAhXoK/zT1d75HUYAFeg1Tr+fdkgI80HuIej//2hSAaAowY5TVc5TrqEEB7hgtNKNdTykKcMOoYRn1uvZQAKIpwAejr5KjX99aCkA0BbiSsjqmXOcSCkA0BSCaAhBNAX5K2xenXe89CkA0BSCaAhBNAYimAERTAKIpANEUgGgK8FPa79FJu957FIBoCkA0BSCaAlxJ2RenXOcSCkA0Bfhg9NVx9OtbSwGIpgA3jLpKjnpdeyjAHaOFZbTrKUUBZowSmlGuowYFIJoCPND76tn7+demAAv0GqJez7slBViotzD1dr5H8WdSNzjz79QR/HVMgA3OGrKznteZmQA7nWEaCP52JsBOR4fv6OP3zgQorMVEEPpyFKCSGkUQ/PIUoKE1pRD2NhSAaN4EE00BiKYARFMAoikA0RSAaM+vL9+fjj4JOMLry/cnE4BoCkA0BSDa8zS97YWOPhFo6ZJ5E4BoCkC0XwWwDSLFddZNAKIpANHeFcA2iNF9zLgJQLRPBTAFGNWtbJsARLtZAFOA0dzL9N0JoASMYi7LtkBEmy2AKUDvHmX44QRQAnq1JLuLtkBKQG+WZtZ7AKItLoApQC/WZHXVBFACzm5tRldvgZSAs9qSzV1h9qvVOYM9i/KuN8GmAUfbm8HdnwIpAUcpkb2i4bUlooWSi27RnwOYBtRWOmPVAmsaUFKtxbX6iq0I7FF7V9F0y6IMLNFyK33Ynl0ZuHbU+8fTvGlViCxn+cDkf9w59OXmskwwAAAAAElFTkSuQmCC";
+  const iconDataUri = "data:image/png;base64,"+ICON_B64;
+  document.getElementById('apple-icon').href = iconDataUri;
+  document.getElementById('favicon').href = iconDataUri;
+  const manifest = {
+    name:"Dog Training Journey",
+    short_name:"Dog Training",
+    start_url:".",
+    display:"standalone",
+    background_color:"#0F3D3A",
+    theme_color:"#0F3D3A",
+    icons:[
+      {src:iconDataUri, sizes:"192x192", type:"image/png"},
+      {src:iconDataUri, sizes:"512x512", type:"image/png"}
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+  document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+
+  const fontLink = document.createElement('link');
+  fontLink.rel = 'stylesheet';
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap';
+  document.head.appendChild(fontLink);
+})();
+
+/* ============================================================
+   INIT
+   ============================================================ */
+render();
+</script>
+</body>
+</html>
