@@ -213,21 +213,33 @@ a{color:var(--teal-700);}
 .fab-settings svg{width:22px;height:22px;}
 
 /* ---------- Week Card / Detail screen ---------- */
-.detail-header{
-  position:sticky; top:0; z-index:15; background:var(--teal-900); color:#fff;
-  padding:calc(14px + var(--safe-top)) 18px 18px;
-  border-radius:0 0 20px 20px;
+.detail-topbar{
+  position:sticky; top:0; z-index:16; background:var(--teal-900); color:#fff;
+  display:flex; align-items:center; gap:8px;
+  padding:calc(14px + var(--safe-top)) 18px 14px;
 }
-.detail-header .back-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-.detail-header .back-btn, .detail-header .icon-btn-dark{
+.detail-topbar .back-btn, .detail-topbar .icon-btn-dark{
   width:36px;height:36px;border-radius:50%; background:rgba(255,255,255,.14); border:none;
-  display:flex; align-items:center; justify-content:center; color:#fff;
+  display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;
 }
-.detail-header .back-btn svg, .detail-header .icon-btn-dark svg{width:17px;height:17px;}
+.detail-topbar .back-btn svg, .detail-topbar .icon-btn-dark svg{width:17px;height:17px;}
+.detail-topbar-title{
+  flex:1; min-width:0; font-family:var(--font-display); font-size:16.5px; font-weight:600; color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  opacity:0; transform:translateY(5px);
+  transition:opacity .18s ease, transform .18s ease;
+}
+.detail-topbar.collapsed .detail-topbar-title{opacity:1; transform:translateY(0);}
 .icon-btn-dark.flash-red{background:var(--danger) !important; color:#fff; transition:background .25s ease;}
-.detail-header .phase-eyebrow{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--teal-100); font-weight:700;}
-.detail-header h1{font-size:24px; margin:6px 0 8px; color:#fff;}
-.detail-header .overview{font-size:14px; color:var(--teal-100); line-height:1.55; opacity:.92; margin:0;}
+.detail-hero{
+  background:var(--teal-900); color:#fff; padding:0 18px 18px;
+  border-radius:0 0 20px 20px; margin-top:-2px;
+  transition:opacity .18s ease;
+}
+.detail-topbar.collapsed + .detail-hero{opacity:.94;}
+.detail-hero .phase-eyebrow{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--teal-100); font-weight:700;}
+.detail-hero h1{font-size:24px; margin:6px 0 8px; color:#fff;}
+.detail-hero .overview{font-size:14px; color:var(--teal-100); line-height:1.55; opacity:.92; margin:0;}
 .action-row{display:flex; gap:10px; margin-top:16px;}
 .action-chip{
   flex:1; display:flex; flex-direction:column; align-items:flex-start; gap:6px;
@@ -253,6 +265,11 @@ a{color:var(--teal-700);}
 .ex-card ul{margin:0; padding-left:18px;}
 .ex-card li{font-size:14px; line-height:1.55; margin-bottom:6px; color:var(--ink);}
 .ex-card .why-text{font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0;}
+.tip-box{margin-top:14px; padding:12px 14px; background:var(--teal-100); border-radius:var(--radius-s);}
+.tip-box .tip-head{display:flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--teal-900); margin-bottom:6px;}
+.tip-box .tip-head svg{width:14px;height:14px;}
+.tip-box p{font-size:13.5px; line-height:1.55; color:var(--teal-900); margin:0 0 6px;}
+.tip-box p:last-child{margin-bottom:0;}
 .carousel-dots{display:flex; justify-content:center; gap:5px; margin:10px 0 0;}
 .carousel-dots span{width:5px;height:5px;border-radius:50%; background:var(--sand-dark);}
 .carousel-dots span.on{background:var(--teal-600);}
@@ -270,6 +287,7 @@ a{color:var(--teal-700);}
   font-family:var(--font-mono); font-weight:700; font-size:12.5px; flex-shrink:0;
   background:var(--sand); color:var(--ink-soft);
 }
+.day-badge svg{width:16px;height:16px;}
 .day-row.complete .day-badge{background:var(--moss-soft); color:var(--moss);}
 .day-row.active .day-badge{background:var(--teal-700); color:#fff;}
 .day-row.locked .day-badge{color:var(--ink-faint);}
@@ -391,6 +409,8 @@ const ICON = {
   calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
   book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16.5H6.5A2.5 2.5 0 004 21.5V5.5z"/><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/></svg>',
   compass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M15.2 8.8l-2 4.6-4.6 2 2-4.6 4.6-2z"/></svg>',
+  bulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.4.9 1 .9 1.7v.4h5.2v-.4c0-.7.3-1.3.9-1.7A6 6 0 0012 3z"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 012-2h1.5l1-1.5h7l1 1.5H18a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"/><circle cx="12" cy="12.5" r="3.5"/></svg>',
 };
 
 /* ---------------- Personalization ---------------- */
@@ -457,6 +477,45 @@ const GOLDEN_RULES = [
 ];
 
 /* ---------------- Exercises (How / Why content) ---------------- */
+/* ---------------- Check-in content (video review prompts) ---------------- */
+const NEWTONS_CRADLE_CHECKIN = {
+  title:"Newton's Cradle check-in",
+  items:[
+    { label:'Terminal marker response', detail:'Record {{dog_name}} using your terminal marker while {{dog_name}} is relaxed around the house and not engaged in anything \u2014 at least an hour after training. Start recording, use the terminal marker, and see if {{dog_name}} comes straight to you. Have food ready to reward.' }
+  ]
+};
+const CHECKIN_CONTENT = {
+  1:[
+    { label:'Play', detail:'Showing the full game \u2014 the walk-out to the garden, the full play session, and the beginning of decompression.' },
+    { label:'Redirect', detail:'One successful redirect, and if possible an unsuccessful attempt too, with a real-world distraction (e.g. a dog on the other side of the road).' },
+  ],
+  2:[
+    { label:'Phase 2 recall', detail:'Recalling {{dog_name}} using lead pops until {{dog_name}} turns and moves toward you, including the terminal marker and reward when {{dog_name}} arrives.' },
+    { label:'Punishment Protocol', detail:'The full sequence, showing all 7 steps \u2014 and more if {{dog_name}} fails again after the first punishment.' },
+    { label:'Play', detail:'The start/end cues, so your trainer can see whether {{dog_name}} is starting to learn {{dog_possessive}} window of opportunity.' },
+  ],
+  3:[
+    { label:'Phase 2 recall', detail:'Recalling {{dog_name}} using lead pops until {{dog_name}} turns and moves toward you, including the terminal marker and reward when {{dog_name}} arrives.' },
+    { label:'Punishment Protocol', detail:'The full sequence, showing all 7 steps \u2014 and more if {{dog_name}} fails again after the first punishment.' },
+    { label:'Play', detail:'The start/end cues, so your trainer can see whether {{dog_name}} is starting to learn {{dog_possessive}} window of opportunity.' },
+  ],
+  4:[
+    { label:'Punishment (away from home)', detail:'Same requirements as Weeks 2 & 3.' },
+    { label:'Play (rules in use)', detail:'Same requirements as previous weeks.' },
+  ],
+  5:[
+    { label:'Phase 3 recall', detail:'Start recording before you issue the recall command, so your trainer can see both the correction and {{dog_possessive}} response.' },
+  ],
+  6:[
+    { label:'Front door setups', detail:'How {{dog_name}} responds to the sound of the doorbell/knocker.' },
+    { label:'Play', detail:'How this is progressing, especially obedience and the use of the green lead \u2014 play time should be getting longer by now.' },
+  ],
+  7:[
+    { label:'Front door setups', detail:'This time, how {{dog_name}} responds to people entering the house.' },
+    { label:'Trigger work', detail:'How {{dog_name}} responds to being around other dogs at liberty, and how reliable recall and redirects are in highly stimulating environments.' },
+  ],
+};
+
 const EX = {
   handFeeding:{ title:'Hand Feeding', how:[
     "No bowl feeding at all; no wet food — kibble only.",
@@ -493,40 +552,82 @@ const EX = {
     "Once {{dog_name}} has won the toy, keep moving away from {{dog_object}}. Let {{dog_name}} parade for a few seconds, then re-engage by grabbing part of the toy while still moving away.",
     "If {{dog_name}} drops the toy, race {{dog_object}} back to it — you must win.",
     "Aim to win the game roughly 2 times out of every 10, and always finish on a win for you — never {{dog_name}}.",
-    "As soon as play ends, move straight into Place decompression." ],
-    why:"Dogs need an outlet to express themselves. Without clear windows for this, pressure builds up until it eventually boils over. Play creates a clear window for {{dog_name}} to express {{dog_possessive}} nature.\n\nYou\u2019ve probably noticed {{dog_name}} can go from 0 to 100 in a blink — but going from 100 back to 0 just as fast is arguably more impressive, which is why decompression happens immediately after play. Once tired out, {{dog_name}} is far more receptive to learning.\n\nWe always end the game on our win so {{dog_name}} feels a small sting of \u201closing\u201d — next time, {{dog_name}} is less likely to drop the toy, remembering that doing so ended the game." },
+    "As soon as play ends, move straight into Place decompression — let this run at least 10\u201315 minutes. Early on this might stretch to 30 minutes if {{dog_possessive}} energy is still high; it will get quicker as training progresses." ],
+    why:"Dogs need an outlet to express themselves. Without clear windows for this, pressure builds up until it eventually boils over. Play creates a clear window for {{dog_name}} to express {{dog_possessive}} nature.\n\nYou\u2019ve probably noticed {{dog_name}} can go from 0 to 100 in a blink — but going from 100 back to 0 just as fast is arguably more impressive, which is why decompression happens immediately after play. Once tired out, {{dog_name}} is far more receptive to learning.\n\nWe always end the game on our win so {{dog_name}} feels a small sting of \u201closing\u201d — next time, {{dog_name}} is less likely to drop the toy, remembering that doing so ended the game.",
+    tip:[
+      "Encourage {{dog_name}} \u2014 use your voice to let {{dog_object}} know {{dog_name}}\u2019s doing great, and make this as fun as you can.",
+      "If {{dog_name}} is uninterested in play and would rather interact with the environment, walk {{dog_object}} around and use the lead to pull {{dog_object}} away from anything {{dog_name}} chooses to interact with, always pulling {{dog_object}} towards you \u2014 keep moving at all times. Once {{dog_name}} starts watching you, begin play with the toy.",
+      "If the game only lasts 30 seconds at this point, that\u2019s fine. There\u2019s a fine balance between ending too early and too late. Too early and {{dog_name}} won\u2019t bother, since the fun ends as soon as it starts. Too late and {{dog_name}} has lost interest and won\u2019t feel the sting of losing. The more {{dog_name}} wants to play, the longer sessions will naturally get." ] },
 
   looseLeadWalking1:{ title:'Loose Lead Walking (early introduction)', how:[
+    "Pick a side for {{dog_name}} to walk on, and stick to it \u2014 consistency here matters more than which side you choose.",
     "Use cones or lampposts as A/B reference points.",
     "Walk {{dog_name}} between them on {{dog_possessive}} prong collar and 6ft lead.",
     "If {{dog_name}} walks in front (nose in front of your toes), crosses behind you, or pulls toward something else, use fair lead pressure and turn 180\u00b0 back to where you came from — no terminal marker here." ],
-    why:"Minimal food here keeps walking boring — which is what makes off-lead freedom rewarding by comparison. It also helps teach {{dog_name}} clearly what\u2019s expected while on lead: essentially, to do nothing besides walk next to you." },
+    why:"Minimal food here keeps walking boring — which is what makes off-lead freedom rewarding by comparison. It also helps teach {{dog_name}} clearly what\u2019s expected while on lead: essentially, to do nothing besides walk next to you.",
+    tip:[
+      "Keep the food in your back pocket, closest to {{dog_name}} — e.g. if {{dog_name}} walks on your right, keep the kibble in your right back pocket.",
+      "This helps {{dog_name}} know where food will come from, and reinforces the preferred walking position." ] },
 
   collarLeadDesensitisation:{ title:'Collar/Lead Desensitisation', how:[
-    "Put {{dog_possessive}} collar and lead on indoors.",
+    "Put {{dog_possessive}} collar and lead on indoors, at least 5 times per day (more is fine).",
     "Leave it on for 5 minutes, then remove it.",
     "If {{dog_name}} is already tethered on a collar/lead for something else at the time, use a separate collar/lead for this." ],
     why:"This reduces any anticipation of what comes after the collar goes on, so the collar stops being a signal that something (a walk, training, excitement) is about to happen." },
 
+  backDoorThresholdManners:{ title:'Back Door Threshold Manners', how:[
+    "Stage 1 — threshold manners:",
+    "Get {{dog_name}} onto {{dog_possessive}} place bed within view of the back door, tethered.",
+    "Walk out, close the door, wait a minute, come back in — walk straight past {{dog_object}}, ignoring {{dog_object}} completely. Once {{dog_name}} has stopped reacting, move to threshold manners.",
+    "Approach the open door on lead and stop before crossing. If {{dog_name}} pauses beside you, proceed calmly. If {{dog_name}} tries to get out first, or sits/lies down, return to the start and try again.",
+    "Goal: {{dog_name}} remains standing at the open door and waits for you to go first.",
+    "Once Stage 1 is solid, progress to Stage 2 — the door knock (or simply opening the back door unannounced):",
+    "Set {{dog_name}} on {{dog_possessive}} place bed, untethered. Use a few duration markers to let {{dog_name}} know it\u2019s training time.",
+    "If someone can knock or call out before opening, do that first. Once {{dog_name}} is calm, open the door.",
+    "If {{dog_name}} reacts in any way (sitting up, looking at the door, barking, etc.), use the Punishment Protocol and return {{dog_object}} to place.",
+    "Repeat until {{dog_name}} is no longer reacting.",
+    "This becomes a permanent house rule from here on — {{dog_name}} never races you out of any door." ],
+    why:"This establishes that every doorway is yours to control, not just the front — helping {{dog_name}} stay settled as you come and go through the back door too, and building the same threshold habit that carries through the rest of the program." },
+
   place_w1:{ title:'Place', how:[
-    'Walk {{dog_name}} onto the place bed. The moment all four paws are on it, say "place" and give a calm "good boy/girl."',
-    "Build short duration on the bed with mild distraction.",
+    'Walk {{dog_name}} onto the place bed. The moment all four paws are on it, use your duration marker (e.g. "good") calmly — no food reward just for getting onto the bed. This keeps place feeling normal and boring, not a high-reward trick.',
+    "Build short duration on the bed with mild distraction, using food sparingly and only via the duration marker — mark first, then go and get the food, then deliver it.",
     "Add a back-tie if {{dog_name}} is making errors (getting up, leaving the bed).",
-    "If using food to reward duration, don\u2019t deliver it too close after an error — this risks rewarding the recovery rather than the calm state." ],
-    why:"This starts teaching {{dog_name}} impulse control very early on into what will be {{dog_possessive}} \u201cnew normal.\u201d This helps remove anticipation and hyper behaviour, while providing {{dog_object}} a safe, calm place outside of the crate." },
+    "If using food to reward duration, don\u2019t deliver it too close after an error — this risks rewarding the recovery rather than the calm state.",
+    "To release: once {{dog_name}} is settled, give the release cue (\u201cbreak\u201d/\u201cOK\u201d) and throw a single piece of kibble on the floor away from the bed — keep the release calm and low-key, unlike the several pieces used outside during Loose Lead Walking.",
+    "After {{dog_name}} has had the kibble, call {{dog_object}} back to heel or back onto the place bed — this creates a clear, repeatable pattern of when {{dog_name}} has freedom and when that freedom time is over." ],
+    why:"This starts teaching {{dog_name}} impulse control very early on into what will be {{dog_possessive}} \u201cnew normal.\u201d Skipping food for simply getting onto the bed keeps place feeling like a normal, calm behaviour rather than a trick worth getting excited over, while a paired release cue makes it just as clear to {{dog_name}} when {{dog_object}} is free to make {{dog_possessive}} own choices — the same principle used in Loose Lead Walking, where \u201cheel\u201d means fall in and walk, and \u201cbreak\u201d/\u201cOK\u201d means {{dog_name}} is at liberty.",
+    tip:[
+      "Use a raised place bed where possible — there\u2019s a psychological effect to physically getting up onto something and back down off it.",
+      "If you\u2019re away from home and taking the place bed isn\u2019t feasible, use a coat or hoodie instead, so {{dog_name}} still has a clear target area." ] },
 
   recall23:{ title:'Recall (Phase 1 \u2192 Phase 2)', how:[
     "Phase 1: Switch {{dog_name}} onto {{dog_possessive}} flat collar. Use the prong collar with a flexi lead or long line. Let {{dog_name}} wander further than before. When ready, recall {{dog_name}}, using frequent, very gentle taps on the lead to guide {{dog_object}} back — don\u2019t stop until {{dog_name}} reaches your feet. Mark, move, pay (1 in 5 a jackpot).",
     "Phase 2 (from Day 10): Switch back to the prong collar. Instead of frequent gentle taps continuing until {{dog_name}} arrives, use slightly firmer lead taps (still frequent) that stop the instant {{dog_name}} turns, lifts {{dog_possessive}} head, and starts moving toward you." ],
     why:"Building a solid recall is essential for {{dog_possessive}} safety and the safety of others — it\u2019s the single most important skill for off-lead time. Phase 1\u2019s frequent gentle taps teach {{dog_name}} how to \u201cturn off\u201d the constant, mildly annoying pressure. Phase 2 starts teaching that acknowledging the recall quickly and early is what turns the pressure off, rather than the eventual return alone." },
 
-  looseLeadPunishment:{ title:'Loose Lead Walking + Punishment Protocol Rehearsal', how:[
-    "Loose Lead Walking: once reliable, introduce artificial distractions (dropped kibble). If {{dog_name}} puts {{dog_possessive}} head down for the kibble, use lead pressure and turn 180\u00b0 back, and keep re-presenting the food on the floor until {{dog_name}} learns to ignore it and walk past it. Once {{dog_name}} has a solid understanding of where {{dog_name}} should be, start using the command \u201cheel\u201d to begin the walk — held until formally released on a \u201cbreak\u201d/\u201cOK\u201d cue.",
-    'Punishment Protocol (rehearsal target: something {{dog_name}} likes doing but shouldn\u2019t — counter surfing, bin diving, etc., never a reactive trigger): set up away from {{dog_name}}. Walk {{dog_object}} toward it. If {{dog_name}} goes for it: mark ("bad"/"stop") \u2192 2 firm lead pops \u2192 disappointed commentary while moving. Repeat this full sequence 3 times, then tether, deliver a final disappointed comment and a sigh, and turn your back. After 30+ seconds, reconcile fully, then re-present the trigger to test understanding.' ],
-    why:"By adding synthetic distractions to loose lead walking, we further instil in {{dog_name}} what the expected behaviour is: head up, eyes front, walk next to you — the environment isn\u2019t {{dog_possessive}} to interact with unless you say so. The Punishment Protocol, rehearsed on something positively-associated rather than a real trigger, is the fairest way to teach {{dog_name}} that a wrong decision has consequences, without {{dog_name}} already being in a heightened emotional state." },
+  looseLeadWalking2:{ title:'Loose Lead Walking', how:[
+    "Once reliable, introduce artificial distractions (dropped kibble). If {{dog_name}} puts {{dog_possessive}} head down for the kibble, use lead pressure and turn 180\u00b0 back, and keep re-presenting the food on the floor until {{dog_name}} learns to ignore it and walk past it.",
+    "Once {{dog_name}} has a solid understanding of where {{dog_name}} should be, start using the command \u201cheel\u201d to begin the walk — held until formally released on a \u201cbreak\u201d/\u201cOK\u201d cue." ],
+    why:"Adding synthetic distractions to loose lead walking further instils in {{dog_name}} what the expected behaviour is: head up, eyes front, walk next to you — the environment isn\u2019t {{dog_possessive}} to interact with unless you say so." },
+
+  punishmentProtocol:{ title:'Punishment Protocol', how:[
+    "Rehearsal target: something {{dog_name}} likes doing but shouldn\u2019t — counter surfing, bin diving, etc. — never a real reactive trigger at this stage. Set the target up away from {{dog_name}} and walk {{dog_object}} toward it, then work through the steps below.",
+    "1. Mark. A firm \u201cbad\u201d/\u201cstop\u201d followed by two firm lead pops. Avoid a word you\u2019ve already overused trying to stop {{dog_name}} — most of these have no power left.",
+    "2. Interrupt. Block progress of the unwanted behaviour completely using the lead — {{dog_name}} cannot be allowed to find success here.",
+    "3. Reiteration. Repeat step 1 twice more, with disappointed theatrics between each delivery. Keep {{dog_name}} moving throughout so {{dog_object}} doesn\u2019t start offering a preferred behaviour like sit to escape the pressure.",
+    "4. Isolation. Tether {{dog_name}} somewhere still in view of the trigger/setup but not close enough to reach it. Lay on the disappointed theatrics and tone once more, then shrug your shoulders and walk away. Steps 1\u20134 should all be delivered at {{dog_possessive}} eye level, making good eye contact.",
+    "5. Rumination. Give {{dog_name}} time in isolation to process what happened — around a minute to start. Don\u2019t interact during this time.",
+    "6. Reconciliation. Return and make up with {{dog_name}}, on your terms, not {{dog_possessive}}. Make sure you\u2019re friends again, with plenty of affection.",
+    "7. Re-present. Re-present {{dog_name}} to the setup or trigger. If {{dog_name}} has understood, {{dog_object}} won\u2019t go near it a second time. Give it plenty of time during practice. If {{dog_name}} fails, go straight back to step 1 and cycle through again until the trigger stops drawing {{dog_object}} in. After 3 cycles with no improvement, increase something — the level of correction, the drama/tone of your voice, or the isolation period." ],
+    why:"Rehearsed first on something {{dog_name}} likes but shouldn\u2019t be doing — never a real reactive trigger — this is the fairest way to teach {{dog_name}} that a wrong decision has consequences, before it\u2019s ever used live.",
+    tip:[
+      "Get on {{dog_possessive}} eye level and make eye contact while delivering the punishment marker, lead pops, and disappointed theatrics — this is supposed to be emotional for {{dog_name}}.",
+      "Once {{dog_name}} is tethered, really lay on the disappointment — a shrug of the shoulders, a big sigh as you walk away. It helps to have a few phrases lined up. Take this slowly — don\u2019t rush through the first steps." ] },
 
   playWithCues:{ title:'Play (with cues)', how:[
-    'Introduce a start cue ("Shall we play?") and an end cue ("All finished").' ],
+    'Introduce a start cue ("Shall we play?") and an end cue ("All finished").',
+    "Decompression after play should be getting quicker by now than it was in Week 1 — keep an eye on how long it\u2019s taking {{dog_name}} to settle." ],
     why:"Adding these cues creates a clear window for {{dog_name}} — unless those words are heard, {{dog_name}} shouldn\u2019t be getting into high-arousal states." },
 
   place_w23:{ title:'Place', how:[
@@ -562,8 +663,12 @@ const EX = {
     "Start the game by building up frustration in {{dog_name}}: move backwards away from {{dog_name}} so {{dog_name}} starts chasing or jumping up at you. Gently push {{dog_object}} off and use phrases like \u201cget off,\u201d \u201ccome on\u201d to build frustration ahead of the game. Once {{dog_possessive}} energy is high, reveal the toy and begin.",
     'Teach "Out": with the toy in {{dog_possessive}} mouth, drop to {{dog_possessive}} level, hand on the toy, firm "OUT" + two firm lead pops. Wait for release — don\u2019t repeat the command, don\u2019t pull the toy out yourself.',
     "Add a re-engage cue (a sound or word) that must be heard before {{dog_name}} is allowed back on the toy.",
-    "As play develops, you can rip the toy away just before {{dog_name}} latches on (max twice, then let {{dog_object}} win the third attempt)." ],
-    why:"We build frustration now so the rules become even more important — following commands in high-arousal states is a much-needed skill. This also gives {{dog_name}} a clear window to jump at people — that annoying thing {{dog_name}} does to visitors now has a dedicated time and place, only when invited.\n\nAdding rules to Play teaches {{dog_name}} that boundaries still apply even in high-arousal states — a rehearsal for real triggers later, where {{dog_name}} will need to keep {{dog_possessive}} head even when aroused." },
+    "As play develops, you can rip the toy away just before {{dog_name}} latches on (max twice, then let {{dog_object}} win the third attempt).",
+    "Decompression time should keep getting shorter — {{dog_name}} should be settling faster after play than in earlier weeks." ],
+    why:"We build frustration now so the rules become even more important — following commands in high-arousal states is a much-needed skill. This also gives {{dog_name}} a clear window to jump at people — that annoying thing {{dog_name}} does to visitors now has a dedicated time and place, only when invited.\n\nAdding rules to Play teaches {{dog_name}} that boundaries still apply even in high-arousal states — a rehearsal for real triggers later, where {{dog_name}} will need to keep {{dog_possessive}} head even when aroused.",
+    tip:[
+      "Play-fighting with {{dog_name}} to start the session is a great way to build energy before the game — pushing {{dog_object}} away, interacting with {{dog_possessive}} face (if comfortable) will raise {{dog_possessive}} energy, which {{dog_name}} then learns to let out in the game.",
+      "\u201cOut\u201d means drop it AND leave it. Once {{dog_name}} releases the toy, drop it on the floor in front of {{dog_object}}. If {{dog_name}} tries to get it, re-deliver \u201cout\u201d followed by the lead pops — don\u2019t repeat more than once per command to start. Once {{dog_name}} has held off for a short period (10 seconds to start, building up over time), pick up the toy, immediately move it away, and use your re-engage cue to restart the game." ] },
 
   freedomWalk:{ title:'Freedom Walk with Long-Line', how:[
     "Switch from a flexi lead to a long training line, letting {{dog_name}} experience real freedom.",
@@ -572,7 +677,8 @@ const EX = {
 
   playWeek67:{ title:'Play', how:[
     "If Play drive is high, add mild obedience into the game — e.g. waiting in a down while the toy is thrown, rather than reacting the instant it\u2019s released.",
-    "You can also start using two leads now (green and red). The red lead is attached to the prong collar, the green lead to a flat collar. With a solid \u201cOUT,\u201d throw the toy and have {{dog_name}} remain in place. To further tap into {{dog_possessive}} drive, switch to the green lead, throw the toy, and release {{dog_name}} to get it — but hold {{dog_object}} back using the green lead. Don\u2019t fully prevent {{dog_name}} from getting the toy, but make {{dog_object}} pull you to it." ],
+    "You can also start using two leads now (green and red). The red lead is attached to the prong collar, the green lead to a flat collar. With a solid \u201cOUT,\u201d throw the toy and have {{dog_name}} remain in place. To further tap into {{dog_possessive}} drive, switch to the green lead, throw the toy, and release {{dog_name}} to get it — but hold {{dog_object}} back using the green lead. Don\u2019t fully prevent {{dog_name}} from getting the toy, but make {{dog_object}} pull you to it.",
+    "By now decompression after play should be quick — {{dog_name}} settling almost immediately is the goal." ],
     why:"This gives {{dog_name}} a clear understanding of when {{dog_name}} can pull through a collar, and when {{dog_name}} can\u2019t. If the only time in the last six weeks {{dog_name}} has pulled through a collar is because you released {{dog_object}} to get a toy, {{dog_name}} learns that pulling isn\u2019t allowed unless released. It also adds another level of competition and frustration to the game, which {{dog_name}} will be loving by now." },
 
   redirectTriggers:{ title:'Redirect Exercise', how:[
@@ -590,10 +696,17 @@ const EX = {
     why:"This is the payoff stage where isolated skills (recall, redirect, punishment protocol) meet a genuine trigger for the first time." },
 
   frontDoorSetups:{ title:'Front Door Set-ups', how:[
+    "Stage 1 — threshold manners:",
     "Get {{dog_name}} onto {{dog_possessive}} place bed within view of the front door, tethered.",
     "Walk out, close the door, wait a minute, come back in — walk straight past {{dog_object}}, ignoring {{dog_object}} completely. Once {{dog_name}} has stopped reacting, move to threshold manners.",
     "Approach the open door on lead and stop before crossing. If {{dog_name}} pauses beside you, proceed calmly. If {{dog_name}} tries to get out first, or sits/lies down, return to the start and try again.",
-    "Goal: {{dog_name}} remains standing at the open door and waits for you to go first." ],
+    "Goal: {{dog_name}} remains standing at the open door and waits for you to go first.",
+    "Once Stage 1 is solid, progress to Stage 2 — the door knock:",
+    "Set {{dog_name}} on {{dog_possessive}} place bed, untethered. Use a few duration markers to let {{dog_name}} know it\u2019s training time.",
+    "Have someone waiting outside before you start. Once {{dog_name}} is calm, knock on the door or ring the doorbell.",
+    "If {{dog_name}} reacts in any way (sitting up, looking at the door, barking, etc.), use the Punishment Protocol and return {{dog_object}} to place.",
+    "Repeat until {{dog_name}} is no longer reacting to the door.",
+    "To progress further: follow through after the knock and come inside. Same rules apply — if {{dog_name}} reacts, punish and return to place." ],
     why:"This establishes that the doorway is yours to control — helping {{dog_name}} stay settled as you come and go, and preventing jumping up at visitors. Not letting {{dog_name}} sit or lie at the open door keeps anticipation of leaving low, since a sit/lie usually means a dog is expecting a reward — which we want to avoid right before a walk." },
 
   place_w67:{ title:'Place', how:[
@@ -673,7 +786,7 @@ function genWeeks23Days(){
     days.push({ day, location:locs[day], recallPhase: day<10?1:2, recallTransition: day===10,
       sessions:{
         morning:[ T('recall23'), PLACE ],
-        afternoon:[ PLAY, PLACE, T('looseLeadPunishment','recall23') ],
+        afternoon:[ PLAY, PLACE, T('looseLeadWalking2','punishmentProtocol','recall23') ],
         evening:[ PLAY, PLACE, T('redirectExercise','recall23') ],
       } });
   }
@@ -756,7 +869,7 @@ const PHASES = {
       {t:'Evening', b:'Formal Place Training now doubles as the calm decompression period.'},
       {t:'End of day', b:'Cuddle time is fine, provided {{dog_name}} is calm.'},
     ],
-    exerciseKeys:['recall23','looseLeadPunishment','redirectExercise','playWithCues','place_w23'],
+    exerciseKeys:['recall23','looseLeadWalking2','punishmentProtocol','redirectExercise','playWithCues','place_w23'],
     days: genWeeks23Days(),
   },
   'weeks4-5':{
@@ -803,8 +916,8 @@ function defaultState(){
     newtonsCradleAlreadyDone:false,
     locationAssignments:{}, // {locationId: chosenLabel}
     completedCount:0, // global index into ALL_DAYS sequence
-    settings:{},
-    ui:{ view:'journey', weekId:null, openDays:{}, exCarouselIndex:{}, modal:null, modalTab:'rules', settingsEditingLocations:false },
+    settings:{ dateGateEnabled:true },
+    ui:{ view:'journey', weekId:null, openDays:{}, exCarouselIndex:{}, modal:null, modalTab:'rules', settingsEditingLocations:false, devUnlocked:false, devPasswordField:'', checkinData:null, pendingDayAction:null },
   };
 }
 let STATE = loadState();
@@ -853,24 +966,88 @@ function nextMondays(count){
    gating and date computation.
    ============================================================ */
 // Derivation per the confirmed skip logic in the scope doc
-function activePhaseIdsExplicit(){
-  const hand = STATE.handFeedingAlreadyDone, cradle = STATE.newtonsCradleAlreadyDone;
+function activePhaseIdsForFlags(handDone, cradleDone){
   const ids=[];
-  if(hand===false){ ids.push('prePhaseA'); ids.push('prePhaseB'); }
-  else if(hand===true && cradle===false){ ids.push('prePhaseB'); }
+  if(handDone===false){ ids.push('prePhaseA'); ids.push('prePhaseB'); }
+  else if(handDone===true && cradleDone===false){ ids.push('prePhaseB'); }
   // hand===true && cradle===true -> neither runs
   MAIN_PHASE_ORDER.forEach(id=>ids.push(id));
   return ids;
 }
-function buildAllDays(){
+function activePhaseIdsExplicit(){
+  return activePhaseIdsForFlags(STATE.handFeedingAlreadyDone, STATE.newtonsCradleAlreadyDone);
+}
+function buildAllDaysForFlags(handDone, cradleDone){
   const flat=[];
-  activePhaseIdsExplicit().forEach(pid=>{
-    const phase = PHASES[pid];
-    phase.days.forEach(dayObj=>{
-      flat.push({ phaseId:pid, dayObj });
-    });
+  activePhaseIdsForFlags(handDone, cradleDone).forEach(pid=>{
+    PHASES[pid].days.forEach(dayObj=>{ flat.push({ phaseId:pid, dayObj }); });
   });
   return flat;
+}
+function buildAllDays(){
+  return buildAllDaysForFlags(STATE.handFeedingAlreadyDone, STATE.newtonsCradleAlreadyDone);
+}
+function computeAutoCompletedCount(startDate, handDone, cradleDone){
+  const allDays = buildAllDaysForFlags(handDone, cradleDone);
+  const today = todayISO();
+  let count = 0;
+  for(let i=0;i<allDays.length;i++){
+    const sched = addDaysISO(startDate, i);
+    if(sched < today) count = i+1; else break;
+  }
+  return count;
+}
+function lastMondayISO(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const dow = d.getDay(); // 0=Sun..6=Sat
+  const diff = dow===0 ? 6 : dow-1;
+  d.setDate(d.getDate()-diff);
+  return fmtISO(d);
+}
+/* The phase where Back Door Threshold Manners is first introduced:
+   Newton's Cradle if it's running this journey, otherwise Week 1 (Hand Feeding is always excluded). */
+function thresholdIntroducerPhaseId(){
+  return activePhaseIdsExplicit().includes('prePhaseB') ? 'prePhaseB' : 'week1';
+}
+function thresholdRuleKind(phaseId){
+  if(phaseId==='prePhaseA') return null;
+  const introducer = thresholdIntroducerPhaseId();
+  if(phaseId===introducer) return 'intro';
+  if(phaseId==='prePhaseB') return null; // not active this journey if we got here
+  return 'reminder'; // any other main phase after the introducer
+}
+function getExerciseKeysForPhase(phaseId){
+  const keys = [...PHASES[phaseId].exerciseKeys];
+  if(phaseId === thresholdIntroducerPhaseId()) keys.push('backDoorThresholdManners');
+  return keys;
+}
+/* Check-in: fires at the end of every real calendar week of the main plan (days 7/14/21/28/35/42/49),
+   and at the end of Newton's Cradle (day 7 of that phase). Never after Hand Feeding. */
+function checkinForCompletedDay(phaseId, day){
+  const phase = PHASES[phaseId];
+  if(phase.kind === 'pre'){
+    if(phaseId === 'prePhaseB' && day === 6){
+      return Object.assign({}, NEWTONS_CRADLE_CHECKIN, { dueNote:'Record this tomorrow, on Day 7 \u2014 the final day of Newton\u2019s Cradle.' });
+    }
+    return null;
+  }
+  if(day % 7 !== 6) return null;
+  const finalDay = day + 1;
+  const weekNum = finalDay / 7; // 1..7
+  const content = CHECKIN_CONTENT[weekNum];
+  if(!content) return null;
+  let mainPhaseId;
+  if(finalDay<=7) mainPhaseId='week1';
+  else if(finalDay<=21) mainPhaseId='weeks2-3';
+  else if(finalDay<=35) mainPhaseId='weeks4-5';
+  else mainPhaseId='weeks6-7';
+  const startDay = PHASES[mainPhaseId].days[0].day;
+  const spansTwo = PHASES[mainPhaseId].days.length > 7;
+  const half = spansTwo ? Math.floor((finalDay-startDay)/7)+1 : null;
+  const label = displayedLabel(mainPhaseId);
+  const title = spansTwo ? `${label} check-in \u2014 Week ${half} of 2` : `${label} check-in`;
+  const dueNote = `Record these tomorrow, on Day ${finalDay} \u2014 the final day of the week.`;
+  return { title, items: content, dueNote };
 }
 function phaseStartIndex(phaseId, allDays){
   const idx = allDays.findIndex(d=>d.phaseId===phaseId);
@@ -913,9 +1090,29 @@ function dayScheduledDate(globalIdx){
 }
 function canCompleteDay(globalIdx){
   if(dayStatus(globalIdx)!=='active') return false;
+  if(STATE.settings.dateGateEnabled===false) return true;
   const sched = dayScheduledDate(globalIdx);
   if(!sched) return true;
   return todayISO() >= sched;
+}
+/* Which day should be auto-expanded when a phase page is freshly opened:
+   prefer the day scheduled for today; otherwise fall back to whichever
+   day in this phase is currently active. Null if neither applies. */
+function findDefaultOpenDay(phaseId){
+  const allDays = buildAllDays();
+  const phase = PHASES[phaseId];
+  const today = todayISO();
+  for(const d of phase.days){
+    const gIdx = dayGlobalIndex(phaseId, d.day, allDays);
+    if(gIdx===-1) continue;
+    if(dayScheduledDate(gIdx) === today) return d.day;
+  }
+  for(const d of phase.days){
+    const gIdx = dayGlobalIndex(phaseId, d.day, allDays);
+    if(gIdx===-1) continue;
+    if(dayStatus(gIdx)==='active') return d.day;
+  }
+  return null;
 }
 
 /* ============================================================
@@ -939,10 +1136,12 @@ function componentLabel(comp, phase){
 function exerciseCardHtml(exKey){
   const ex = EX[exKey];
   const howItems = ex.how.map(h=>`<li>${esc(P(h))}</li>`).join('');
+  const tipHtml = ex.tip ? `<div class="tip-box"><div class="tip-head">${ICON.bulb}Pro tip</div>${ex.tip.map(t=>`<p>${esc(P(t))}</p>`).join('')}</div>` : '';
   return `<div class="ex-card">
     <h3>${esc(P(ex.title))}</h3>
     <div class="subhead">The How</div>
     <ul>${howItems}</ul>
+    ${tipHtml}
     <div class="subhead">The Why</div>
     ${paraHtml(P(ex.why))}
   </div>`;
@@ -956,12 +1155,17 @@ function obStepIndex(){
   const key = STATE.ui.obStep || 'welcome';
   return OB_STEPS.indexOf(key);
 }
+function onboardingNeedsAutoDate(draft){
+  return draft.handFeedingStatus==='in_progress' || (draft.handFeedingStatus==='done' && draft.newtonsCradleStatus==='in_progress');
+}
 function obDotsHtml(){
   // dots exclude welcome/review
   const mid = ['handfeeding','newtonscradle','dogname','startdate','locations'];
   const cur = STATE.ui.obStep;
   const draft = STATE.onboardingDraft;
-  const visible = mid.filter(k => k!=='newtonscradle' || draft.handFeedingAlreadyDone===true);
+  const visible = mid
+    .filter(k => k!=='newtonscradle' || draft.handFeedingStatus==='done')
+    .filter(k => k!=='startdate' || !onboardingNeedsAutoDate(draft));
   return `<div class="progress-dots">${visible.map(k=>`<span class="${k===cur?'on':''}"></span>`).join('')}</div>`;
 }
 function goObStep(key){ STATE.ui.obStep = key; STATE.ui._obHistory = STATE.ui._obHistory||[]; render(); }
@@ -971,9 +1175,16 @@ function obNext(fromKey){
   hist.push(fromKey);
   let next;
   if(fromKey==='welcome') next='handfeeding';
-  else if(fromKey==='handfeeding') next = draft.handFeedingAlreadyDone===true ? 'newtonscradle' : 'dogname';
+  else if(fromKey==='handfeeding') next = draft.handFeedingStatus==='done' ? 'newtonscradle' : 'dogname';
   else if(fromKey==='newtonscradle') next='dogname';
-  else if(fromKey==='dogname') next='startdate';
+  else if(fromKey==='dogname'){
+    if(onboardingNeedsAutoDate(draft)){
+      draft.startDate = lastMondayISO();
+      next = 'locations';
+    } else {
+      next = 'startdate';
+    }
+  }
   else if(fromKey==='startdate') next='locations';
   else if(fromKey==='locations') next='review';
   STATE.ui.obStep = next;
@@ -1011,35 +1222,39 @@ function obWelcome(){
 }
 function obHandFeeding(){
   const draft = STATE.onboardingDraft;
+  const v = draft.handFeedingStatus;
   return `<div class="onboard-screen">
     ${obDotsHtml()}
     <div class="step-eyebrow">Getting started</div>
-    <h2 class="step-q">Has your dog already completed Hand Feeding?</h2>
+    <h2 class="step-q">Where are you with Hand Feeding?</h2>
     <p class="step-sub">Hand Feeding is the first pre-requisite week — no bowl, kibble hand-fed only.</p>
     <div class="choice-list">
-      <button class="choice ${draft.handFeedingAlreadyDone===false?'selected':''}" data-action="ob-set" data-field="handFeedingAlreadyDone" data-value="false">No, we haven\u2019t started it yet</button>
-      <button class="choice ${draft.handFeedingAlreadyDone===true?'selected':''}" data-action="ob-set" data-field="handFeedingAlreadyDone" data-value="true">Yes, it\u2019s already done</button>
+      <button class="choice ${v==='not_started'?'selected':''}" data-action="ob-set" data-field="handFeedingStatus" data-value="not_started">Not started yet</button>
+      <button class="choice ${v==='in_progress'?'selected':''}" data-action="ob-set" data-field="handFeedingStatus" data-value="in_progress">In progress</button>
+      <button class="choice ${v==='done'?'selected':''}" data-action="ob-set" data-field="handFeedingStatus" data-value="done">Already done</button>
     </div>
     <div class="onboard-footer">
       <button class="btn btn-ghost" data-action="ob-back">Back</button>
-      <button class="btn btn-primary" data-action="ob-continue" data-from="handfeeding" ${draft.handFeedingAlreadyDone===undefined?'disabled':''}>Continue</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="handfeeding" ${v===undefined?'disabled':''}>Continue</button>
     </div>
   </div>`;
 }
 function obNewtonsCradle(){
   const draft = STATE.onboardingDraft;
+  const v = draft.newtonsCradleStatus;
   return `<div class="onboard-screen">
     ${obDotsHtml()}
     <div class="step-eyebrow">Getting started</div>
-    <h2 class="step-q">Has your dog already completed Newton's Cradle?</h2>
+    <h2 class="step-q">Where are you with Newton's Cradle?</h2>
     <p class="step-sub">The marker-timing feeding game that follows Hand Feeding.</p>
     <div class="choice-list">
-      <button class="choice ${draft.newtonsCradleAlreadyDone===false?'selected':''}" data-action="ob-set" data-field="newtonsCradleAlreadyDone" data-value="false">No, not yet</button>
-      <button class="choice ${draft.newtonsCradleAlreadyDone===true?'selected':''}" data-action="ob-set" data-field="newtonsCradleAlreadyDone" data-value="true">Yes, it\u2019s already done</button>
+      <button class="choice ${v==='not_started'?'selected':''}" data-action="ob-set" data-field="newtonsCradleStatus" data-value="not_started">Not started yet</button>
+      <button class="choice ${v==='in_progress'?'selected':''}" data-action="ob-set" data-field="newtonsCradleStatus" data-value="in_progress">In progress</button>
+      <button class="choice ${v==='done'?'selected':''}" data-action="ob-set" data-field="newtonsCradleStatus" data-value="done">Already done</button>
     </div>
     <div class="onboard-footer">
       <button class="btn btn-ghost" data-action="ob-back">Back</button>
-      <button class="btn btn-primary" data-action="ob-continue" data-from="newtonscradle" ${draft.newtonsCradleAlreadyDone===undefined?'disabled':''}>Continue</button>
+      <button class="btn btn-primary" data-action="ob-continue" data-from="newtonscradle" ${v===undefined?'disabled':''}>Continue</button>
     </div>
   </div>`;
 }
@@ -1110,16 +1325,22 @@ function obLocations(){
 }
 function obReview(){
   const draft = STATE.onboardingDraft;
-  const hand = draft.handFeedingAlreadyDone;
-  const cradle = draft.newtonsCradleAlreadyDone;
+  const handDone = draft.handFeedingStatus==='done';
+  const cradleDone = handDone && draft.newtonsCradleStatus==='done';
   let startsWith;
-  if(hand===false) startsWith = 'Hand Feeding';
-  else if(cradle===false) startsWith = "Newton's Cradle";
+  if(!handDone) startsWith = 'Hand Feeding';
+  else if(!cradleDone) startsWith = "Newton's Cradle";
   else startsWith = 'Week 1 of the main plan';
+  const autoScenario = onboardingNeedsAutoDate(draft);
+  const autoCount = autoScenario ? computeAutoCompletedCount(draft.startDate, handDone, cradleDone) : 0;
+  const autoNote = autoCount>0
+    ? `<p class="step-sub" style="margin-top:-10px;">Since ${esc(draft.dogName||'your dog')} is already partway through, <b>${autoCount} day${autoCount===1?'':'s'}</b> will be marked complete automatically, up to today.</p>`
+    : '';
   return `<div class="onboard-screen">
     <div class="step-eyebrow">All set</div>
     <h2 class="step-q">Ready for ${esc(draft.dogName||'your dog')}\u2019s journey</h2>
     <p class="step-sub">Starting ${fmtDisplay(draft.startDate)}, beginning with <b>${esc(startsWith)}</b>. You can revisit locations and settings any time.</p>
+    ${autoNote}
     <div class="golden-banner">
       <div class="gt">Golden rules, throughout</div>
       <ul style="margin:0;padding-left:18px;">${GOLDEN_RULES.map(r=>`<li>${esc(personalize(r.body, draft))}</li>`).join('')}</ul>
@@ -1148,17 +1369,20 @@ function renderJourney(){
     return {pid, phase, status, label, dayCount};
   });
   const dogName = STATE.dogName || 'your dog';
+  const devPeek = STATE.ui.devUnlocked;
   const rows = nodes.map(n=>{
+    const peekable = n.status==='locked' && devPeek;
     const icon = n.status==='complete' ? ICON.check : n.status==='locked' ? ICON.lock : (n.pid.startsWith('pre') ? '' : '');
     const dotContent = n.status==='complete' ? ICON.check : (n.status==='locked' ? ICON.lock : (n.dayCount));
     return `<div class="node-row ${n.status}">
       <div class="trail-connector"></div>
       <div class="node-dot-wrap"><div class="node-dot">${n.status==='active' ? n.dayCount+'d' : dotContent}</div></div>
-      <button class="node-card" data-action="open-week" data-phase="${n.pid}" ${n.status==='locked'?'disabled':''}>
+      <button class="node-card" data-action="open-week" data-phase="${n.pid}" ${(n.status==='locked' && !devPeek)?'disabled':''}>
         <div class="label">${esc(n.label)}${n.pid.startsWith('pre') ? ' \u2014 '+esc(n.phase.title) : ''}</div>
         <div class="goal">${esc(P(n.phase.overview))}</div>
         <div class="meta-row">
           <span class="pill pill-${n.status==='complete'?'complete':n.status==='active'?'active':'locked'}">${n.status==='complete'?'Complete':n.status==='active'?'In progress':'Locked'}</span>
+          ${peekable ? '<span class="pill" style="background:var(--clay-soft);color:var(--clay);">Dev peek</span>' : ''}
         </div>
       </button>
     </div>`;
@@ -1191,7 +1415,7 @@ function renderWeekDetail(phaseId){
   const status = phaseStatus(phaseId, allDays);
 
   // exercise carousel
-  const exKeys = phase.exerciseKeys;
+  const exKeys = getExerciseKeysForPhase(phaseId);
   const idx = STATE.ui.exCarouselIndex[phaseId] || 0;
   const carouselCards = exKeys.map(k=>exerciseCardHtml(k)).join('');
   const dots = exKeys.map((k,i)=>`<span class="${i===idx?'on':''}"></span>`).join('');
@@ -1216,7 +1440,7 @@ function renderWeekDetail(phaseId){
       }).join('');
     }
     const canComplete = canCompleteDay(gIdx);
-    const dailyTaskHtml = phase.dailyTaskKey ? `<div class="session-block"><div class="session-name">Daily task</div><div class="component-chain"><div class="component"><div class="dot"></div><div><div class="ctext"><b>${esc(P(EX[phase.dailyTaskKey].title))}</b></div><div class="cloc">Home \u00b7 anytime during the day</div></div></div></div></div>` : '';
+    const dailyTaskHtml = phase.dailyTaskKey ? `<div class="session-block"><div class="session-name">Daily task</div><div class="component-chain"><div class="component"><div class="dot"></div><div><div class="ctext"><b>${esc(P(EX[phase.dailyTaskKey].title))}</b></div><div class="cloc">Home \u00b7 at least 5x today</div></div></div></div></div>` : '';
     let lockedNote = '';
     if(st==='locked'){
       lockedNote = `<div class="day-locked-note">${ICON.lock}<span>Complete the current day first to unlock this one.</span></div>`;
@@ -1224,7 +1448,7 @@ function renderWeekDetail(phaseId){
       lockedNote = `<div class="day-locked-note">${ICON.calendar}<span>Unlocks ${fmtDisplay(sched)}.</span></div>`;
     }
     const completeBtn = (st==='active') ? `<div class="complete-btn-wrap"><button class="btn btn-primary btn-block" data-action="complete-day" data-phase="${phaseId}" data-day="${d.day}" ${canComplete?'':'disabled'}>Mark day complete</button></div>` : '';
-    return `<div class="day-row ${st} ${open?'open':''}">
+    return `<div class="day-row ${st} ${open?'open':''}" id="day-row-${phaseId}-${d.day}">
       <button class="day-row-head" data-action="toggle-day" data-phase="${phaseId}" data-day="${d.day}">
         <div class="left">
           <div class="day-badge">${st==='complete'?ICON.check:st==='locked'?ICON.lock:d.day}</div>
@@ -1244,15 +1468,17 @@ function renderWeekDetail(phaseId){
     </div>`;
   }).join('');
 
+  const shortTitle = `${label}${isPre?' \u2014 '+phase.title:''}`;
   return `
-    <div class="detail-header">
-      <div class="back-row">
-        <button class="back-btn" data-action="back-to-journey">${ICON.back}</button>
-        <div class="row" style="gap:8px;">
-          <button class="icon-btn-dark" data-action="open-location" data-phase="${phaseId}">${ICON.pin}</button>
-          <button class="icon-btn-dark" data-action="open-info" data-phase="${phaseId}">${ICON.info}</button>
-        </div>
+    <div class="detail-topbar" id="detail-topbar">
+      <button class="back-btn" data-action="back-to-journey">${ICON.back}</button>
+      <div class="detail-topbar-title" id="detail-topbar-title">${esc(shortTitle)}</div>
+      <div class="row" style="gap:8px;">
+        <button class="icon-btn-dark" data-action="open-location" data-phase="${phaseId}">${ICON.pin}</button>
+        <button class="icon-btn-dark" data-action="open-info" data-phase="${phaseId}">${ICON.info}</button>
       </div>
+    </div>
+    <div class="detail-hero" id="detail-hero">
       <div class="phase-eyebrow">${isPre?'Pre-requisite':'Main plan'} \u00b7 ${status==='complete'?'Complete':status==='active'?'In progress':'Locked'}</div>
       <h1>${esc(label)}${isPre?' \u2014 '+esc(phase.title):''}</h1>
       <p class="overview">${esc(P(phase.overview))}</p>
@@ -1350,13 +1576,21 @@ function renderInfoModal(phaseId){
   if(tab==='rules'){
     const golden = `<div class="rule-item"><div class="rtitle">Golden rules (always)</div>${GOLDEN_RULES.map(r=>`<p>\u2022 <b>${esc(r.title)}.</b> ${esc(P(r.body))}</p>`).join('')}</div>`;
     let phaseRules = '';
+    const thresholdKind = thresholdRuleKind(phaseId);
+    const thresholdRuleHtml = thresholdKind==='intro'
+      ? `<div class="rule-item"><div class="rtitle">Back door threshold manners</div><p>${esc(P('Use the threshold routine covered in the exercise card above, every time {{dog_name}} goes in or out of the back door. From here on this becomes a permanent house rule \u2014 {{dog_name}} never races you out of the door.'))}</p></div>`
+      : thresholdKind==='reminder'
+      ? `<div class="rule-item"><div class="rtitle">Doorway manners</div><p>${esc(P('{{dog_name}} never races you out of the door \u2014 keep the threshold routine going at every exit, front or back.'))}</p></div>`
+      : '';
     if(phase.kind==='main'){
       phaseRules = phase.weekRules.map(r=>`<div class="rule-item"><div class="rtitle">${esc(r.t)}</div><p>${esc(P(r.b))}</p></div>`).join('')
+        + thresholdRuleHtml
         + `<div class="rule-item"><div class="rtitle">Place level this stage</div><p>${esc(P(phase.placeLevel))}</p></div>`;
     } else if(phaseId==='prePhaseA'){
       phaseRules = `<div class="rule-item"><div class="rtitle">Kibble only</div><p>${esc(P('No bowl feeding at all; no wet food. Only kibble, hand-fed, twice daily.'))}</p></div>`;
     } else {
-      phaseRules = `<div class="rule-item"><div class="rtitle">On a flexi lead</div><p>${esc(P('{{dog_name}} stays on a flexi lead throughout every feed.'))}</p></div>`;
+      phaseRules = `<div class="rule-item"><div class="rtitle">On a flexi lead</div><p>${esc(P('{{dog_name}} stays on a flexi lead throughout every feed.'))}</p></div>`
+        + thresholdRuleHtml;
     }
     body = golden + phaseRules;
   } else {
@@ -1372,6 +1606,39 @@ function renderGoldenModal(){
 /* ============================================================
    SETTINGS VIEW
    ============================================================ */
+function renderDevSection(){
+  const unlocked = STATE.ui.devUnlocked;
+  if(!unlocked){
+    return `<hr class="divider">
+    <div class="settings-section">
+      <h3>Developer</h3>
+      <p class="faint" style="margin:-4px 0 14px;">Enter the developer password to reveal testing controls.</p>
+      <div class="field" style="margin-bottom:12px;">
+        <input type="password" placeholder="Password" value="${esc(STATE.ui.devPasswordField||'')}" data-action="dev-password-input" autocomplete="off">
+      </div>
+      <button class="btn btn-plain btn-sm" data-action="dev-unlock">Unlock</button>
+    </div>`;
+  }
+  return `<hr class="divider">
+    <div class="settings-section">
+      <h3>Developer</h3>
+      <div class="setting-row">
+        <div><div class="lbl">Date gate</div><div class="desc">When off, any active day can be marked complete regardless of its scheduled date.</div></div>
+        <button class="switch ${STATE.settings.dateGateEnabled?'on':''}" data-action="toggle-dategate"></button>
+      </div>
+      <div class="setting-row">
+        <div><div class="lbl">Developer mode</div><div class="desc">Unlocked for this session only.</div></div>
+        <button class="btn btn-plain btn-sm" data-action="dev-lock">Lock</button>
+      </div>
+      <div class="setting-row">
+        <div><div class="lbl">Redo setup</div><div class="desc">Wipes everything and returns to the first onboarding question \u2014 useful for testing other skip-logic branches.</div></div>
+        <button class="btn btn-plain btn-sm" data-action="open-redo-setup-confirm">Redo</button>
+      </div>
+      <div class="setting-row">
+        <div><div class="lbl">Peek future weeks</div><div class="desc">While unlocked, locked trail stages can be opened to preview their content.</div></div>
+      </div>
+    </div>`;
+}
 function renderSettings(){
   const s = STATE;
   const locItems = LOCATIONS.map(loc=>{
@@ -1426,6 +1693,7 @@ function renderSettings(){
       </div>
       <input type="file" id="restore-file-input" accept="application/json,.json" style="display:none;">
     </div>
+    ${renderDevSection()}
     <hr class="divider">
     <div class="settings-section">
       <h3>Reference</h3>
@@ -1452,6 +1720,39 @@ function renderResetConfirmModal(){
       <button class="btn btn-danger" data-action="confirm-reset-progress">Reset progress</button>
     </div>
   `);
+}
+function renderRedoSetupConfirmModal(){
+  return modalShell('Return to setup?', `
+    <p class="faint" style="margin-top:0;">This clears everything \u2014 dog details, gender, locations, and all progress \u2014 and takes you back to the very first onboarding question.</p>
+    <p class="faint">This can\u2019t be undone.</p>
+    <div class="onboard-footer" style="margin-top:20px;">
+      <button class="btn btn-ghost" data-action="close-modal">Cancel</button>
+      <button class="btn btn-danger" data-action="confirm-redo-setup">Return to setup</button>
+    </div>
+  `);
+}
+function renderCheckinModal(){
+  const info = STATE.ui.checkinData;
+  if(!info) return '';
+  const itemsHtml = info.items.map(it=>`<div class="rule-item"><div class="rtitle">${esc(P(it.label))}</div><p>${esc(P(it.detail))}</p></div>`).join('');
+  const dueNoteHtml = info.dueNote ? `<div class="tip-box" style="margin:0 0 16px;"><div class="tip-head">${ICON.calendar}Heads up</div><p>${esc(P(info.dueNote))}</p></div>` : '';
+  return `<div class="modal-backdrop" data-action="close-checkin">
+    <div class="modal-sheet" data-stop="1">
+      <div class="modal-grabber"></div>
+      <div style="display:flex; justify-content:center; margin:14px 0 6px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--teal-100);display:flex;align-items:center;justify-content:center;color:var(--teal-700);">${ICON.camera}</div>
+      </div>
+      <div class="modal-head" style="justify-content:center; text-align:center; padding-top:4px;"><h2>${esc(info.title)}</h2></div>
+      <div class="modal-body">
+        <p class="faint" style="margin-top:0; text-align:center;">Send these videos to your trainer for approval \u2014 the app doesn\u2019t record or store anything itself.</p>
+        ${dueNoteHtml}
+        ${itemsHtml}
+        <div class="onboard-footer" style="margin-top:20px;">
+          <button class="btn btn-primary btn-block" data-action="close-checkin">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 /* ============================================================
@@ -1511,6 +1812,8 @@ function render(){
   else if(STATE.ui.modal==='golden') html += renderGoldenModal();
   else if(STATE.ui.modal==='restart-date') html += renderRestartDateModal();
   else if(STATE.ui.modal==='reset-confirm') html += renderResetConfirmModal();
+  else if(STATE.ui.modal==='redo-setup-confirm') html += renderRedoSetupConfirmModal();
+  else if(STATE.ui.modal==='checkin') html += renderCheckinModal();
   app.innerHTML = html;
   // restore carousel scroll position + wire scroll listener for dots
   if(STATE.ui.view==='week' && STATE.ui.weekId){
@@ -1536,6 +1839,33 @@ function render(){
       }, {passive:true});
     }
   }
+  // detail header collapse-on-scroll
+  if(window.__detailScrollHandler){
+    window.removeEventListener('scroll', window.__detailScrollHandler);
+    window.__detailScrollHandler = null;
+  }
+  if(STATE.ui.view==='week' && STATE.ui.weekId){
+    const bar = document.getElementById('detail-topbar');
+    if(bar){
+      const onScroll = ()=>{ bar.classList.toggle('collapsed', window.scrollY > 28); };
+      window.addEventListener('scroll', onScroll, {passive:true});
+      window.__detailScrollHandler = onScroll;
+      onScroll();
+    }
+  }
+  // one-shot: scroll the freshly-opened default day into view if it isn't already
+  if(STATE.ui.view==='week' && STATE.ui._scrollToDay!=null){
+    const targetDay = STATE.ui._scrollToDay;
+    STATE.ui._scrollToDay = null;
+    const rowEl = document.getElementById('day-row-'+STATE.ui.weekId+'-'+targetDay);
+    if(rowEl){
+      requestAnimationFrame(()=>{
+        const rect = rowEl.getBoundingClientRect();
+        const inView = rect.top >= 60 && rect.bottom <= window.innerHeight;
+        if(!inView) rowEl.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    }
+  }
 }
 
 /* ============================================================
@@ -1553,10 +1883,28 @@ function closeModalWithFlash(){
     }
   }
 }
+function dismissCheckin(){
+  const pending = STATE.ui.pendingDayAction;
+  STATE.ui.modal = null;
+  STATE.ui.checkinData = null;
+  STATE.ui.pendingDayAction = null;
+  if(pending){
+    const { phaseId, day, isLastDayOfPhase } = pending;
+    STATE.ui.openDays[phaseId+':'+day] = false;
+    if(isLastDayOfPhase){
+      STATE.ui.view = 'journey';
+      STATE.ui.weekId = null;
+    } else {
+      STATE.ui.openDays[phaseId+':'+(day+1)] = true;
+    }
+  }
+  render();
+}
 document.addEventListener('click', function(e){
   const backdrop = e.target.closest('.modal-backdrop');
   if(backdrop && !e.target.closest('[data-stop]')){
-    closeModalWithFlash(); return;
+    if(STATE.ui.modal==='checkin'){ dismissCheckin(); } else { closeModalWithFlash(); }
+    return;
   }
   const t = e.target.closest('[data-action]');
   if(!t) return;
@@ -1576,11 +1924,13 @@ document.addEventListener('click', function(e){
       STATE.dogName = draft.dogName.trim();
       STATE.dogGender = draft.dogGender || 'male';
       STATE.startDate = draft.startDate;
-      STATE.handFeedingAlreadyDone = !!draft.handFeedingAlreadyDone;
-      STATE.newtonsCradleAlreadyDone = draft.handFeedingAlreadyDone ? !!draft.newtonsCradleAlreadyDone : false;
+      STATE.handFeedingAlreadyDone = draft.handFeedingStatus === 'done';
+      STATE.newtonsCradleAlreadyDone = STATE.handFeedingAlreadyDone ? (draft.newtonsCradleStatus === 'done') : false;
       STATE.locationAssignments = {};
       LOCATIONS.forEach(loc=>{ STATE.locationAssignments[loc.id] = (draft.locationAssignments && draft.locationAssignments[loc.id]) || loc.name; });
-      STATE.completedCount = 0;
+      STATE.completedCount = onboardingNeedsAutoDate(draft)
+        ? computeAutoCompletedCount(STATE.startDate, STATE.handFeedingAlreadyDone, STATE.newtonsCradleAlreadyDone)
+        : 0;
       STATE.onboarded = true;
       saveState();
       toast('Journey started \u2014 welcome, '+STATE.dogName+'!');
@@ -1590,6 +1940,11 @@ document.addEventListener('click', function(e){
       if(t.disabled) break;
       const phaseId = t.dataset.phase;
       STATE.ui.view='week'; STATE.ui.weekId=phaseId; STATE.ui.modal=null;
+      // collapse every day in this phase, then auto-expand only today's/active day
+      Object.keys(STATE.ui.openDays).forEach(k=>{ if(k.indexOf(phaseId+':')===0) delete STATE.ui.openDays[k]; });
+      const defaultDay = findDefaultOpenDay(phaseId);
+      if(defaultDay!=null) STATE.ui.openDays[phaseId+':'+defaultDay] = true;
+      STATE.ui._scrollToDay = defaultDay;
       const allDays = buildAllDays();
       const startIdx = phaseStartIndex(phaseId, allDays);
       if(STATE.completedCount === startIdx){
@@ -1619,18 +1974,52 @@ document.addEventListener('click', function(e){
       toast('Day '+day+' marked complete.');
       const phase = PHASES[phaseId];
       const isLastDayOfPhase = phase.days[phase.days.length-1].day === day;
-      STATE.ui.openDays[phaseId+':'+day] = false;
-      if(isLastDayOfPhase){
-        STATE.ui.view = 'journey';
-        STATE.ui.weekId = null;
-        STATE.ui.modal = null;
+      const checkin = checkinForCompletedDay(phaseId, day);
+      if(checkin){
+        STATE.ui.checkinData = checkin;
+        STATE.ui.pendingDayAction = { phaseId, day, isLastDayOfPhase };
+        STATE.ui.modal = 'checkin';
       } else {
-        STATE.ui.openDays[phaseId+':'+(day+1)] = true;
+        STATE.ui.openDays[phaseId+':'+day] = false;
+        if(isLastDayOfPhase){
+          STATE.ui.view = 'journey';
+          STATE.ui.weekId = null;
+          STATE.ui.modal = null;
+        } else {
+          STATE.ui.openDays[phaseId+':'+(day+1)] = true;
+        }
       }
       render(); break;
     }
+    case 'close-checkin': dismissCheckin(); break;
     case 'settings-set': {
       STATE[t.dataset.field] = t.dataset.value;
+      saveState(); render(); break;
+    }
+    case 'dev-unlock': {
+      const entered = STATE.ui.devPasswordField || '';
+      if(entered === 'dev-adam'){
+        STATE.ui.devUnlocked = true;
+        STATE.ui.devPasswordField = '';
+        toast('Developer mode unlocked.');
+      } else {
+        toast('Incorrect password.');
+      }
+      render(); break;
+    }
+    case 'dev-lock': STATE.ui.devUnlocked = false; render(); break;
+    case 'open-redo-setup-confirm': STATE.ui.modal='redo-setup-confirm'; render(); break;
+    case 'confirm-redo-setup': {
+      const devFlag = STATE.ui.devUnlocked;
+      STATE = defaultState();
+      STATE.ui.devUnlocked = devFlag;
+      saveState();
+      toast('Back to setup.');
+      render();
+      break;
+    }
+    case 'toggle-dategate': {
+      STATE.settings.dateGateEnabled = !STATE.settings.dateGateEnabled;
       saveState(); render(); break;
     }
     case 'export-backup': exportBackup(); break;
@@ -1673,6 +2062,16 @@ document.addEventListener('input', function(e){
   } else if(action==='settings-loc-input'){
     STATE.locationAssignments[el.dataset.locid] = el.value;
     saveState();
+  } else if(action==='dev-password-input'){
+    STATE.ui.devPasswordField = el.value;
+  }
+}, false);
+
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && e.target && e.target.dataset && e.target.dataset.action==='dev-password-input'){
+    e.preventDefault();
+    const btn = document.querySelector('[data-action="dev-unlock"]');
+    if(btn) btn.click();
   }
 }, false);
 
