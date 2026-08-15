@@ -188,14 +188,23 @@ a{color:var(--teal-700);}
 .node-row.complete .node-dot{background:var(--moss); border-color:var(--moss); color:#fff;}
 .node-card{
   flex:1; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-m);
-  padding:16px 16px; text-align:left; width:100%;
+  width:100%; overflow:hidden;
 }
+.node-card-open{display:block; width:100%; text-align:left; padding:16px 16px 12px; background:transparent; border:none;}
 .node-row.locked .node-card{background:transparent; border-style:dashed; opacity:.7;}
 .node-row.active .node-card{border-color:var(--teal-600); box-shadow:var(--shadow-card);}
 .node-card .label{font-family:var(--font-display); font-size:17px; font-weight:600; color:var(--teal-900); margin-bottom:2px;}
 .node-row.locked .node-card .label{color:var(--ink-faint);}
 .node-card .goal{font-size:13.5px; color:var(--ink-soft); line-height:1.45; margin-top:4px;}
-.node-card .meta-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+.node-card .meta-row{display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap;}
+.pill-ext{background:var(--clay-soft); color:var(--clay);}
+.node-card-footer{display:flex; align-items:center; gap:8px; padding:0 16px 14px; flex-wrap:wrap; border-top:1px dashed var(--line); margin-top:2px; padding-top:10px;}
+.btn-extend{
+  font-family:inherit; font-size:12.5px; font-weight:700; color:var(--teal-700);
+  background:var(--teal-100); border:none; border-radius:999px; padding:7px 13px;
+}
+.btn-extend:disabled{opacity:.4;}
+.btn-extend-remove{background:var(--sand-dark); color:var(--ink-soft);}
 .trail-connector{
   position:absolute; left:15px; top:32px; bottom:-34px; width:2px;
   background:repeating-linear-gradient(to bottom, var(--line) 0 6px, transparent 6px 11px);
@@ -514,6 +523,16 @@ const CHECKIN_CONTENT = {
     { label:'Front door setups', detail:'This time, how {{dog_name}} responds to people entering the house.' },
     { label:'Trigger work', detail:'How {{dog_name}} responds to being around other dogs at liberty, and how reliable recall and redirects are in highly stimulating environments.' },
   ],
+};
+/* Check-in content keyed by main phase + week-within-that-phase (1-based),
+   using the phase's original (un-extended) weekly content. Extension
+   weeks reuse the last defined week's content for that phase, same as
+   how extension weeks reuse the last week's locations. */
+const CHECKIN_CONTENT_BY_PHASE = {
+  'week1': [CHECKIN_CONTENT[1]],
+  'weeks2-3': [CHECKIN_CONTENT[2], CHECKIN_CONTENT[3]],
+  'weeks4-5': [CHECKIN_CONTENT[4], CHECKIN_CONTENT[5]],
+  'weeks6-7': [CHECKIN_CONTENT[6], CHECKIN_CONTENT[7]],
 };
 
 const EX = {
@@ -902,6 +921,66 @@ const PHASES = {
 const MAIN_PHASE_ORDER = ['week1','weeks2-3','weeks4-5','weeks6-7'];
 
 /* ============================================================
+   WEEK EXTENSIONS
+   Each phase can have any number of extra 1-week blocks appended.
+   BASE_PHASE_DAYS is a frozen snapshot of each phase's original
+   (un-extended) day data, captured once at load. Extension weeks
+   are built by cloning the last 7 days of that original data
+   (i.e. the phase's final real week) and re-numbering them.
+   ============================================================ */
+const BASE_PHASE_DAYS = {};
+Object.keys(PHASES).forEach(pid=>{ BASE_PHASE_DAYS[pid] = JSON.parse(JSON.stringify(PHASES[pid].days)); });
+
+function computeExtendedDays(phaseId){
+  const base = BASE_PHASE_DAYS[phaseId];
+  const ext = (STATE.extensions && STATE.extensions[phaseId]) || 0;
+  const out = base.map(d=>JSON.parse(JSON.stringify(d)));
+  if(ext<=0) return out;
+  const lastWeek = base.slice(-7);
+  for(let w=0; w<ext; w++){
+    lastWeek.forEach(tmpl=>{ out.push(JSON.parse(JSON.stringify(tmpl))); });
+  }
+  return out;
+}
+/* Rebuilds PHASES[*].days from BASE_PHASE_DAYS + STATE.extensions and
+   re-numbers the 'day' field: pre-requisite phases number independently
+   from 1; main phases number continuously across MAIN_PHASE_ORDER.
+   Cheap to call, so it's called at the top of every render() to
+   guarantee PHASES always matches STATE.extensions. */
+function applyExtensions(){
+  if(!STATE.extensions) STATE.extensions = {};
+  ['prePhaseA','prePhaseB'].forEach(pid=>{
+    const days = computeExtendedDays(pid);
+    days.forEach((d,i)=>{ d.day = i+1; });
+    PHASES[pid].days = days;
+  });
+  let nextDay = 1;
+  MAIN_PHASE_ORDER.forEach(pid=>{
+    const days = computeExtendedDays(pid);
+    days.forEach(d=>{ d.day = nextDay; nextDay++; });
+    PHASES[pid].days = days;
+  });
+}
+function phaseWeekCount(phaseId){ return Math.ceil(PHASES[phaseId].days.length/7); }
+/* Extending is only safe while the phase isn't complete yet: the new
+   week is always appended right after the phase's current last day,
+   and completedCount (a raw index into the flat day sequence) only
+   stays meaningful if nothing already-completed sits past that point. */
+function canExtendPhase(phaseId, allDays){
+  return phaseStatus(phaseId, allDays) !== 'complete';
+}
+function canShrinkPhase(phaseId, allDays){
+  const ext = (STATE.extensions && STATE.extensions[phaseId]) || 0;
+  if(ext<=0) return false;
+  const status = phaseStatus(phaseId, allDays);
+  if(status==='complete') return false;
+  const start = phaseStartIndex(phaseId, allDays);
+  const days = PHASES[phaseId].days;
+  const boundaryBeforeLastWeek = start + (days.length - 7);
+  return STATE.completedCount <= boundaryBeforeLastWeek;
+}
+
+/* ============================================================
    STATE
    ============================================================ */
 const STORAGE_KEY = 'dogtraining.state.v1';
@@ -916,6 +995,7 @@ function defaultState(){
     newtonsCradleAlreadyDone:false,
     locationAssignments:{}, // {locationId: chosenLabel}
     completedCount:0, // global index into ALL_DAYS sequence
+    extensions:{}, // {phaseId: number of extra 1-week blocks appended}
     settings:{ dateGateEnabled:true },
     ui:{ view:'journey', weekId:null, openDays:{}, exCarouselIndex:{}, modal:null, modalTab:'rules', settingsEditingLocations:false, devUnlocked:false, devPasswordField:'', checkinData:null, pendingDayAction:null },
   };
@@ -1026,26 +1106,31 @@ function getExerciseKeysForPhase(phaseId){
 function checkinForCompletedDay(phaseId, day){
   const phase = PHASES[phaseId];
   if(phase.kind === 'pre'){
-    if(phaseId === 'prePhaseB' && day === 6){
-      return Object.assign({}, NEWTONS_CRADLE_CHECKIN, { dueNote:'Record this tomorrow, on Day 7 \u2014 the final day of Newton\u2019s Cradle.' });
+    if(phaseId === 'prePhaseB'){
+      const lastDay = phase.days[phase.days.length-1].day;
+      if(day === lastDay-1){
+        return Object.assign({}, NEWTONS_CRADLE_CHECKIN, { dueNote:`Record this tomorrow, on Day ${lastDay} \u2014 the final day of Newton\u2019s Cradle.` });
+      }
     }
     return null;
   }
   if(day % 7 !== 6) return null;
   const finalDay = day + 1;
-  const weekNum = finalDay / 7; // 1..7
-  const content = CHECKIN_CONTENT[weekNum];
+  // Find which (possibly-extended) main phase this day falls in.
+  let mainPhaseId=null, phaseFirstDay=null;
+  for(const id of MAIN_PHASE_ORDER){
+    const days = PHASES[id].days;
+    const first = days[0].day, last = days[days.length-1].day;
+    if(finalDay>=first && finalDay<=last){ mainPhaseId=id; phaseFirstDay=first; break; }
+  }
+  if(!mainPhaseId) return null;
+  const weekWithinPhase = Math.floor((finalDay-phaseFirstDay)/7) + 1;
+  const contentArr = CHECKIN_CONTENT_BY_PHASE[mainPhaseId];
+  const content = contentArr[Math.min(weekWithinPhase, contentArr.length)-1];
   if(!content) return null;
-  let mainPhaseId;
-  if(finalDay<=7) mainPhaseId='week1';
-  else if(finalDay<=21) mainPhaseId='weeks2-3';
-  else if(finalDay<=35) mainPhaseId='weeks4-5';
-  else mainPhaseId='weeks6-7';
-  const startDay = PHASES[mainPhaseId].days[0].day;
-  const spansTwo = PHASES[mainPhaseId].days.length > 7;
-  const half = spansTwo ? Math.floor((finalDay-startDay)/7)+1 : null;
+  const totalWeeksInPhase = phaseWeekCount(mainPhaseId);
   const label = displayedLabel(mainPhaseId);
-  const title = spansTwo ? `${label} check-in \u2014 Week ${half} of 2` : `${label} check-in`;
+  const title = totalWeeksInPhase>1 ? `${label} check-in \u2014 Week ${weekWithinPhase} of ${totalWeeksInPhase}` : `${label} check-in`;
   const dueNote = `Record these tomorrow, on Day ${finalDay} \u2014 the final day of the week.`;
   return { title, items: content, dueNote };
 }
@@ -1054,18 +1139,23 @@ function phaseStartIndex(phaseId, allDays){
   return idx;
 }
 function displayedLabel(phaseId){
-  const hand = STATE.handFeedingAlreadyDone, cradle = STATE.newtonsCradleAlreadyDone;
-  if(phaseId==='prePhaseA') return 'Week 1';
-  if(phaseId==='prePhaseB') return hand===false ? 'Week 2' : 'Week 1';
-  const handUsed = hand===false, cradleUsed = (hand===false || cradle===false);
-  const shift = (handUsed?1:0) + (cradleUsed?1:0);
-  const maps = {
-    'week1': ['Week 1','Week 2','Week 3'],
-    'weeks2-3': ['Weeks 2 & 3','Weeks 3 & 4','Weeks 4 & 5'],
-    'weeks4-5': ['Weeks 4 & 5','Weeks 5 & 6','Weeks 6 & 7'],
-    'weeks6-7': ['Weeks 6 & 7','Weeks 7 & 8','Weeks 8 & 9'],
-  };
-  return maps[phaseId][shift];
+  // Dynamically walks the active phase sequence, tallying week counts
+  // (which grow with extensions) to find this phase's week number(s).
+  // This naturally reproduces the hand/cradle skip-shift the old fixed
+  // maps did, while also accounting for any extension weeks added.
+  const activeIds = activePhaseIdsExplicit();
+  let startWeek = 1;
+  for(const pid of activeIds){
+    const wc = phaseWeekCount(pid);
+    if(pid===phaseId){
+      const endWeek = startWeek + wc - 1;
+      if(wc===1) return `Week ${startWeek}`;
+      if(wc===2) return `Weeks ${startWeek} & ${endWeek}`;
+      return `Weeks ${startWeek}-${endWeek}`;
+    }
+    startWeek += wc;
+  }
+  return PHASES[phaseId].baseLabel || PHASES[phaseId].title;
 }
 function phaseStatus(phaseId, allDays){
   const start = phaseStartIndex(phaseId, allDays);
@@ -1366,7 +1456,10 @@ function renderJourney(){
     const status = phaseStatus(pid, allDays);
     const label = displayedLabel(pid);
     const dayCount = phase.days.length;
-    return {pid, phase, status, label, dayCount};
+    const ext = (STATE.extensions && STATE.extensions[pid]) || 0;
+    const canExtend = canExtendPhase(pid, allDays);
+    const canShrink = canShrinkPhase(pid, allDays);
+    return {pid, phase, status, label, dayCount, ext, canExtend, canShrink};
   });
   const dogName = STATE.dogName || 'your dog';
   const devPeek = STATE.ui.devUnlocked;
@@ -1377,14 +1470,21 @@ function renderJourney(){
     return `<div class="node-row ${n.status}">
       <div class="trail-connector"></div>
       <div class="node-dot-wrap"><div class="node-dot">${n.status==='active' ? n.dayCount+'d' : dotContent}</div></div>
-      <button class="node-card" data-action="open-week" data-phase="${n.pid}" ${(n.status==='locked' && !devPeek)?'disabled':''}>
-        <div class="label">${esc(n.label)}${n.pid.startsWith('pre') ? ' \u2014 '+esc(n.phase.title) : ''}</div>
-        <div class="goal">${esc(P(n.phase.overview))}</div>
-        <div class="meta-row">
-          <span class="pill pill-${n.status==='complete'?'complete':n.status==='active'?'active':'locked'}">${n.status==='complete'?'Complete':n.status==='active'?'In progress':'Locked'}</span>
-          ${peekable ? '<span class="pill" style="background:var(--clay-soft);color:var(--clay);">Dev peek</span>' : ''}
+      <div class="node-card">
+        <button class="node-card-open" data-action="open-week" data-phase="${n.pid}" ${(n.status==='locked' && !devPeek)?'disabled':''}>
+          <div class="label">${esc(n.label)}${n.pid.startsWith('pre') ? ' \u2014 '+esc(n.phase.title) : ''}</div>
+          <div class="goal">${esc(P(n.phase.overview))}</div>
+          <div class="meta-row">
+            <span class="pill pill-${n.status==='complete'?'complete':n.status==='active'?'active':'locked'}">${n.status==='complete'?'Complete':n.status==='active'?'In progress':'Locked'}</span>
+            ${peekable ? '<span class="pill" style="background:var(--clay-soft);color:var(--clay);">Dev peek</span>' : ''}
+            ${n.ext>0 ? `<span class="pill pill-ext">+${n.ext} wk${n.ext>1?'s':''} added</span>` : ''}
+          </div>
+        </button>
+        <div class="node-card-footer">
+          <button class="btn-extend" data-action="extend-phase" data-phase="${n.pid}" ${n.canExtend?'':'disabled'} title="Add a 1-week extension">${ICON.plus||'+'} 1 week</button>
+          ${n.ext>0 ? `<button class="btn-extend btn-extend-remove" data-action="shrink-phase" data-phase="${n.pid}" ${n.canShrink?'':'disabled'} title="Remove the last extension week">Remove week</button>` : ''}
         </div>
-      </button>
+      </div>
     </div>`;
   }).join('');
   return `
@@ -1796,6 +1896,7 @@ function restoreBackupFromFile(file){
    ROOT RENDER
    ============================================================ */
 function render(){
+  applyExtensions();
   const app = document.getElementById('app');
   let html;
   if(!STATE.onboarded){
@@ -1992,6 +2093,25 @@ document.addEventListener('click', function(e){
       render(); break;
     }
     case 'close-checkin': dismissCheckin(); break;
+    case 'extend-phase': {
+      const phaseId = t.dataset.phase;
+      const allDays = buildAllDays();
+      if(!canExtendPhase(phaseId, allDays)){ toast('Can\u2019t extend a completed week.'); break; }
+      if(!STATE.extensions) STATE.extensions = {};
+      STATE.extensions[phaseId] = (STATE.extensions[phaseId]||0) + 1;
+      saveState();
+      toast('Added a 1-week extension.');
+      render(); break;
+    }
+    case 'shrink-phase': {
+      const phaseId = t.dataset.phase;
+      const allDays = buildAllDays();
+      if(!canShrinkPhase(phaseId, allDays)){ toast('Can\u2019t remove that week \u2014 progress has already been made into it.'); break; }
+      STATE.extensions[phaseId] = Math.max(0, (STATE.extensions[phaseId]||0) - 1);
+      saveState();
+      toast('Removed the extension week.');
+      render(); break;
+    }
     case 'settings-set': {
       STATE[t.dataset.field] = t.dataset.value;
       saveState(); render(); break;
